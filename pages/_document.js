@@ -17,9 +17,8 @@ export default function Document() {
           name="description"
           content="Superio - Job Borad React NextJS Template"
         />
-        <meta name="ibthemes" content="ATFN" />
 
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.png" />
       </Head>
       <body>
         <Main />
