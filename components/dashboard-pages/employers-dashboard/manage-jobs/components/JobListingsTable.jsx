@@ -162,7 +162,7 @@ const JobListingsTable = () => {
             <input
               className="chosen-single form-input chosen-container mx-3"
               type="text"
-              name="immense-career-job_title"
+              name="tracer-hire-job_title"
               placeholder="Search by Job Title"
               value={searchField}
               onChange={(e) => {

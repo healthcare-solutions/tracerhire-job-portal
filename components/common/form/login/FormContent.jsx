@@ -96,7 +96,7 @@ const FormContent = () => {
   const dispatch = useDispatch()
   return (
     <div className="form-inner">
-      <h3>Login to Immense Career</h3>
+      <h3>Login to Tracer Hire</h3>
 
       {/* <!--Login Form--> */}
       <form method="post">
@@ -104,7 +104,7 @@ const FormContent = () => {
           <label>Email Address</label>
           <input
             type="email"
-            name="immense-career-email"
+            name="tracer-hire-email"
             placeholder="Your Email Address"
             value={loginEmail}
             onChange={(e) => setLoginEmail(e.target.value)}
@@ -116,7 +116,7 @@ const FormContent = () => {
           <label>Password</label>
           <input
             type="password"
-            name="immense-career-password"
+            name="tracer-hire-password"
             value={loginPassword}
             onChange={(e) => setLoginPassword(e.target.value)}
             placeholder="Password"

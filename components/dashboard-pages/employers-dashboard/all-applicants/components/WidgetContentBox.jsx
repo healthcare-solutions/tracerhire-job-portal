@@ -216,7 +216,7 @@ const WidgetContentBox = () => {
                     <input
                         className="chosen-single form-input chosen-container mx-3"
                         type="text"
-                        name="immense-career-applicant"
+                        name="tracer-hire-applicant"
                         placeholder="Search by Applicant name"
                         value={searchField}
                         onChange={(e) => {

@@ -86,7 +86,7 @@ const SearchForm3 = () => {
           <span className="icon flaticon-search-1"></span>
           <input
             type="text"
-            name="immense-search_form_job_title"
+            name="tracer-hire-search_form_job_title"
             placeholder="Job title, keywords, or company"
             ref={searchTerm}
           />
@@ -97,7 +97,7 @@ const SearchForm3 = () => {
           <span className="icon flaticon-map-locator"></span>
           <input
             type="text"
-            name="immense-search_form_location"
+            name="tracer-hire-search_form_location"
             ref={searchInput}
             placeholder="City, State, Country or Zip code" />
         </div>

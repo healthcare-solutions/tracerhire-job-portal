@@ -239,7 +239,7 @@ const PostBoxForm = () => {
           <label>Job Title <span className="required">(required)</span></label>
           <input
             type="text"
-            name="immense-career-jobTitle"
+            name="tracer-hire-jobTitle"
             value={jobTitle}
             required
             onChange={(e) => {
@@ -382,7 +382,7 @@ const PostBoxForm = () => {
           <label>Offered Salary <span className="optional">(optional)</span></label>
           <input
             type="text"
-            name="immense-career-salary"
+            name="tracer-hire-salary"
             value={salary}
             placeholder="$100,000.00"
             onChange={(e) => {
@@ -507,7 +507,7 @@ const PostBoxForm = () => {
           <label>City <span className="required">(required)</span></label>
           <input
             type="text"
-            name="immense-city"
+            name="tracer-hire-city"
             required
             value={city}
             onChange={(e) => {
@@ -543,7 +543,7 @@ const PostBoxForm = () => {
           <label>Complete Address <span className="optional">(optional)</span></label>
           <input
             type="text"
-            name="immense-career-address"
+            name="tracer-hire-address"
             value={completeAddress}
             onChange={(e) => {
               setJobData((previousState) => ({ 
@@ -559,7 +559,7 @@ const PostBoxForm = () => {
           <label>City, State <span className="required">(required)</span></label>
           <input
             type="text"
-            name="immense-career-address"
+            name="tracer-hire-address"
             ref={searchInput}            
             placeholder="City, State"
           />

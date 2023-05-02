@@ -179,7 +179,7 @@ const EditJobView = ({ fetchedJobData }) => {
           { !editedJobTitle ? 
             <input
                 type="text"
-                name="immense-career-jobTitle"
+                name="tracer-hire-jobTitle"
                 value={fetchedJobData.job_title}
                 required
                 onChange={(e) => {
@@ -192,7 +192,7 @@ const EditJobView = ({ fetchedJobData }) => {
             />
             : <input
                     type="text"
-                    name="immense-career-jobTitle"
+                    name="tracer-hire-jobTitle"
                     value={editedJobTitle}
                     required
                     onChange={(e) => {
@@ -410,7 +410,7 @@ const EditJobView = ({ fetchedJobData }) => {
           <label>Offered Salary <span className="optional">(optional)</span></label>
           <input
             type="text"
-            name="immense-career-salary"
+            name="tracer-hire-salary"
             value={fetchedJobData.salary}
             placeholder="$100,000.00"
             onChange={(e) => {
@@ -574,7 +574,7 @@ const EditJobView = ({ fetchedJobData }) => {
           <label>City <span className="required">(required)</span></label>
           <input
             type="text"
-            name="immense-city"
+            name="tracer-hire-city"
             required
             value={city}
             onChange={(e) => {
@@ -611,7 +611,7 @@ const EditJobView = ({ fetchedJobData }) => {
           { !editedCompleteAddress ?
             <input
                 type="text"
-                name="immense-career-address"
+                name="tracer-hire-address"
                 value={fetchedJobData.job_comp_add}
                 onChange={(e) => {
                 setEditedJobData((previousState) => ({ 
@@ -623,7 +623,7 @@ const EditJobView = ({ fetchedJobData }) => {
             />
             : <input
                     type="text"
-                    name="immense-career-address"
+                    name="tracer-hire-address"
                     value={editedCompleteAddress}
                     onChange={(e) => {
                     setEditedJobData((previousState) => ({ 
@@ -641,13 +641,13 @@ const EditJobView = ({ fetchedJobData }) => {
           { !editedAddress ?
             <input
                 type="text"
-                name="immense-career-address"
+                name="tracer-hire-address"
                 ref={searchInput}
                 placeholder="City, State"
             />
             : <input
                 type="text"
-                name="immense-career-address"
+                name="tracer-hire-address"
                 ref={searchInput}                    
                 placeholder="City, State"
               />

@@ -73,7 +73,7 @@ const LocationBox = () => {
         <>
             <input
                 type="text"
-                name="immense-search_form_location"
+                name="tracer-hire-search_form_location"
                 placeholder="City, State, Country or Zip code"
                 value={getLocation}
                 ref={searchInput}

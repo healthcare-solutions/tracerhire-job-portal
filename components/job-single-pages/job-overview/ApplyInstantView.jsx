@@ -149,7 +149,7 @@ const ApplyInstantView = ({ company }) => {
           <label>First Name<span className="required"> (required)</span></label>
           <input
             type="text"
-            name="immense-career-first_name"
+            name="tracer-hire-first_name"
             placeholder="Enter first name"
             value={firstName}
             onChange={(e) => {
@@ -164,7 +164,7 @@ const ApplyInstantView = ({ company }) => {
           <label>Last Name<span className="required"> (required)</span></label>
           <input
             type="text"
-            name="immense-career-last_name"
+            name="tracer-hire-last_name"
             placeholder="Enter last name"
             value={lastName}
             onChange={(e) => {
@@ -179,7 +179,7 @@ const ApplyInstantView = ({ company }) => {
           <label>Email Address<span className="required"> (required)</span></label>
           <input
             type="email"
-            name="immense-career-email"
+            name="tracer-hire-email"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -196,7 +196,7 @@ const ApplyInstantView = ({ company }) => {
           <label>License Number<span className="required"> (required)</span></label>
           <input
             type="text"
-            name="immense-career-license_number"
+            name="tracer-hire-license_number"
             value={licenseNumber}
             onChange={(e) => {
               setLicenseNumber(e.target.value);
