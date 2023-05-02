@@ -5,12 +5,12 @@ import "firebase/compat/auth";
 import { getFirestore } from "firebase/firestore";
 import "firebase/compat/auth";
 const firebaseConfig = {
-  apiKey: "AIzaSyAo9hmuIq-VJiU9Hc2QRBQC43236QS9rHI",
-  authDomain: "immense-career.firebaseapp.com",
-  projectId: "immense-career",
-  storageBucket: "immense-career.appspot.com",
-  messagingSenderId: "351436627626",
-  appId: "1:351436627626:web:3956bcb0abb8cbef613ad3"
+    apiKey: "AIzaSyB1a9gamx04kJ2vnzeqQ8N1bMqWRt0eXRc",
+    authDomain: "tracerhire.firebaseapp.com",
+    projectId: "tracerhire",
+    storageBucket: "tracerhire.appspot.com",
+    messagingSenderId: "643269423744",
+    appId: "1:643269423744:web:3e3d9df6c4d8406ea8ec65"
 };
 const app = firebase.initializeApp(firebaseConfig);
 export const db = getFirestore();
