@@ -121,7 +121,7 @@ const JobListingsTable = () => {
         .order('created_at',  { ascending: false });
         data.forEach( job => job.created_at = dateFormat(job.created_at))
         setjobs(data) 
-      console.log(data)
+
         setjobs(data.filter((job) => job.job_title.toLowerCase().includes(searchField.toLowerCase())))
     };
 
@@ -276,6 +276,13 @@ const JobListingsTable = () => {
                   <td>
                     <div className="option-box">
                       <ul className="option-list">
+                        <li onClick={()=>{
+                          router.push(`/employers-dashboard/clone-job/${item.job_id}`)
+                        }}>
+                          <button data-text="Clone Job">
+                            <span className="la la-copy"></span>
+                          </button>
+                        </li>
                         <li onClick={()=>{
                           router.push(`/job/${item.job_id}`)
                         }}>
