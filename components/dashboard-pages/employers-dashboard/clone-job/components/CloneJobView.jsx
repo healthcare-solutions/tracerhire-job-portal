@@ -106,22 +106,22 @@ const CloneJobView = () => {
   const router = useRouter();
   const jobId = router.query.id;
 
-  const searchInput = useRef();
+  const searchInput = useRef(null);
 
   const [fetchedJobData, setFetchedJobData] = useState({});
   
   const fetchJob = async () => {
     try{
       if (jobId) {
-        let { data: job, error } = await supabase
+        let { data, error } = await supabase
             .from('jobs')
             .select("*")
   
             // Filters
             .eq('job_id', jobId)
   
-        if (job) {
-          setFetchedJobData(job[0])
+        if (data) {
+          setFetchedJobData(data[0])
         }
       }
     } catch(e) {
