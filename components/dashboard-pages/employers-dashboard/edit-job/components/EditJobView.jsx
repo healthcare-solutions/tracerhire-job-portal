@@ -695,6 +695,15 @@ const EditJobView = ({ fetchedJobData }) => {
           >
             Save Changes
           </button>
+          <button
+            className="theme-btn btn-style-one"
+            onClick={()=>{
+                router.push(`/employers-dashboard/manage-jobs`)
+              }}
+            style={{marginLeft: "10px"}}
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </form>
