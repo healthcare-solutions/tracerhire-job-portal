@@ -8,9 +8,10 @@ import { useRouter } from "next/router";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { supabase } from "../../../config/supabaseClient";
+import axios from "axios";
 // import { v4 } from "uuid";
 
-const ApplyJobModalContent = () => {
+const ApplyJobModalContent = ({company}) => {
   const [licenseNumber, setLicenseNumber] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [licenseNumberError, setLicenseNumberError] = useState("");
@@ -107,6 +108,41 @@ const ApplyJobModalContent = () => {
                 theme: "colored",
               });
             } else {
+              let time = new Date()
+              const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                  let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
+                  if ((encoded.length % 4) > 0) {
+                    encoded += '='.repeat(4 - (encoded.length % 4));
+                  }
+                  resolve(encoded);
+                };
+                reader.onerror = reject;
+            });
+
+              const fileBase64 = await toBase64(selectedFile)
+
+                axios({
+                  method: 'POST',
+                  url: '/api/mail',
+                  data: {
+                    name: user.name,
+                    redirectionUrl: `https://immensecareer.com`,
+                    time: time.toLocaleString('en-US'),
+                    jobId: jobId,
+                    jobTitle: company.job_title,
+                    attachments: [
+                      {
+                        content: fileBase64,
+                        filename: selectedFile.name,
+                        type: selectedFile.type,
+                        disposition: "attachment"
+                      }
+                    ]
+                  }
+                })       
               // open toast
               toast.success('Successfully Applied in this job!', {
                 position: "bottom-right",

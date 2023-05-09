@@ -6,6 +6,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../../common/form/firebase";
 import { supabase } from "../../../config/supabaseClient";
 import { toast } from "react-toastify";
+import axios from 'axios'
 
 const ApplyInstantView = ({ company }) => {
 
@@ -123,6 +124,41 @@ const ApplyInstantView = ({ company }) => {
                 theme: "colored",
               });
             } else {
+              let time = new Date()
+              const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                  let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
+                  if ((encoded.length % 4) > 0) {
+                    encoded += '='.repeat(4 - (encoded.length % 4));
+                  }
+                  resolve(encoded);
+                };
+                reader.onerror = reject;
+            });
+
+              const fileBase64 = await toBase64(guestSelectedFile)
+
+                axios({
+                  method: 'POST',
+                  url: '/api/mail',
+                  data: {
+                    name: firstName + " " + lastName,
+                    redirectionUrl: `https://immensecareer.com`,
+                    time: time.toLocaleString('en-US'),
+                    jobId: jobId,
+                    jobTitle: company.job_title,
+                    attachments: [
+                      {
+                        content: fileBase64,
+                        filename: guestSelectedFile.name,
+                        type: guestSelectedFile.type,
+                        disposition: "attachment"
+                      }
+                    ]
+                  }
+                })       
               // open toast
               toast.success('Successfully Applied in this job!', {
                 position: "bottom-right",

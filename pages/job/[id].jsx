@@ -220,7 +220,7 @@ const JobSingleDynamicV1 = () => {
                       </div>
                       {/* End modal-header */}
 
-                      <ApplyJobModalContent />
+                      <ApplyJobModalContent company={company}/>
                       {/* End PrivateMessageBox */}
                     </div>
                     {/* End .send-private-message-wrapper */}
