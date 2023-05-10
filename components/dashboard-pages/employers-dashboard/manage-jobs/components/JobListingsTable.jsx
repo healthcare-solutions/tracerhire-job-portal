@@ -214,7 +214,7 @@ const JobListingsTable = () => {
             </thead>
 
             <tbody>
-              {jobs.slice(0, 10).map((item) => (
+              {jobs.map((item) => (
                 <tr key={item.job_id}>
                   <td>
                     {/* <!-- Job Block --> */}
