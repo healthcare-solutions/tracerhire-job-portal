@@ -117,7 +117,6 @@ const JobListingsTable = () => {
     let { data, error } = await supabase
         .from('manage_jobs_view')
         .select()
-        .eq('user_id', user.id)
         .order('created_at',  { ascending: false });
         data.forEach( job => job.created_at = dateFormat(job.created_at))
         setjobs(data) 
@@ -130,7 +129,6 @@ const JobListingsTable = () => {
     let { data, error } = await supabase
       .from('manage_jobs_view')
       .select()
-      .eq('user_id', user.id)
       .order('created_at',  { ascending: false });
 
       data.forEach( job => job.created_at = dateFormat(job.created_at))
