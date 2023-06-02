@@ -133,6 +133,7 @@ const ApplyJobModalContent = ({company}) => {
                     time: time.toLocaleString('en-US'),
                     jobId: jobId,
                     jobTitle: company.job_title,
+                    jobCompAdd: company.job_comp_add,
                     attachments: [
                       {
                         content: fileBase64,
