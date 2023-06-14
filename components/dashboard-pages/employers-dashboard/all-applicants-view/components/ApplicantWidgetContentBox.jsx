@@ -198,6 +198,7 @@ const ApplicantWidgetContentBox = () => {
             </h4>
 
             <div className="chosen-outer">
+            <Link href={'/employers-dashboard/manage-jobs'} className="btn btn-primary text-nowrap m-1">Back</Link>
                 {/* <!--Tabs Box--> */}
     {/*
                 <select className="chosen-single form-select">
