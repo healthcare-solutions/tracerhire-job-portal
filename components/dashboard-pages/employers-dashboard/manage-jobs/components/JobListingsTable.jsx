@@ -199,7 +199,7 @@ const JobListingsTable = () => {
       {/* End filter top bar */}
 
       {/* Start table widget content */}
-      {jobs.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500' }}><center>You have not posted any jobs yet!</center></p>: 
+      {jobs.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom:40 }}><center>You have not posted any jobs yet!</center></p>: 
         <div className="widget-content">
         <div className="table-outer">
           <table className="default-table manage-job-table">
@@ -290,7 +290,7 @@ const JobListingsTable = () => {
                         </li>
                         <li onClick={()=>{ publishJob(item.job_id, item.status) }} >
                           <button data-text="Publish Job">
-                            <span className="la la-eye"></span>
+                            <span className="la la-check"></span>
                           </button>
                         </li>
                         <li onClick={()=>{ unpublishJob(item.job_id, item.status) }}>

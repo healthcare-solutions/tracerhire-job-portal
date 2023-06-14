@@ -85,6 +85,7 @@ const ApplyJobModalContent = ({company}) => {
                 .insert([
                   {
                     user_id: userId,
+                    cust_id: company.cust_id,
                     email: user.email,
                     name: user.name,
                     license_nbr: licenseNumber,
