@@ -39,7 +39,6 @@ const index = () => {
               <div className="ls-widget">
                 <div className="tabs-box">
                   <div className="widget-title">
-                    <h4>My Packages</h4>
                   </div>
                   {/* End widget-title */}
 
