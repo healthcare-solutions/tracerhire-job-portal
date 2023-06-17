@@ -7,10 +7,17 @@ import { db } from "../../../../common/form/firebase";
 // import jobs from "../../../../../data/job-featured.js";
 import { supabase } from "../../../../../config/supabaseClient";
 import { toast, ToastContainer } from "react-toastify";
+import { BallTriangle } from 'react-loader-spinner'
+
 
 const JobListingsTable = () => {
   const [jobs, setjobs] = useState([]);
   const [searchField, setSearchField] = useState('');
+  const [rpp, setRpp] = useState(20);
+  const [arrPages, setArrPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   //const [jobStatus, setJobStatus] = useState('');
   const user = useSelector(state => state.candidate.user)
   const router = useRouter();
@@ -28,16 +35,16 @@ const JobListingsTable = () => {
 
   const dateFormat = (val) => {
     const date = new Date(val)
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric'}) + ', ' + date.getFullYear()
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + date.getFullYear()
   }
 
   // Publish job action
   const publishJob = async (jobId, status) => {
     if (status !== 'Published') {
       const { data, error } = await supabase
-          .from('jobs')
-          .update({ status: 'Published' })
-          .eq('job_id', jobId)
+        .from('jobs')
+        .update({ status: 'Published' })
+        .eq('job_id', jobId)
 
       // open toast
       toast.success('Job successfully published!', {
@@ -52,7 +59,7 @@ const JobListingsTable = () => {
       });
 
       // fetching all posts to refresh the data in Job Listing Table
-      fetchPost();
+      fetchPost(currentPage);
     } else {
       // open toast
       toast.error('Job is already published!', {
@@ -72,9 +79,9 @@ const JobListingsTable = () => {
   const unpublishJob = async (jobId, status) => {
     if (status !== 'Unpublished') {
       const { data, error } = await supabase
-          .from('jobs')
-          .update({ status: 'Unpublished' })
-          .eq('job_id', jobId)
+        .from('jobs')
+        .update({ status: 'Unpublished' })
+        .eq('job_id', jobId)
 
       // open toast
       toast.success('Job successfully unpublished!', {
@@ -89,7 +96,7 @@ const JobListingsTable = () => {
       });
 
       // fetching all posts to refresh the data in Job Listing Table
-      fetchPost();
+      fetchPost(currentPage);
     } else {
       // open toast
       toast.error('Job is already unpublished!', {
@@ -108,36 +115,75 @@ const JobListingsTable = () => {
   // clear all filters
   const clearAll = () => {
     setSearchField('');
-    fetchPost()
+    fetchPost(currentPage)
   };
 
+  const handleAddNew = () => {
+
+  }
+
   // Search function
-  async function findJob () {
+  async function findJob() {
 
-    let { data, error } = await supabase
-        .from('manage_jobs_view')
-        .select()
-        .order('created_at',  { ascending: false });
-        data.forEach( job => job.created_at = dateFormat(job.created_at))
-        setjobs(data) 
-
-        setjobs(data.filter((job) => job.job_title.toLowerCase().includes(searchField.toLowerCase())))
-    };
-
-  // Initial Function
-  const fetchPost = async () => {
     let { data, error } = await supabase
       .from('manage_jobs_view')
       .select()
-      .order('created_at',  { ascending: false });
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    data.forEach(job => job.created_at = dateFormat(job.created_at))
+    setjobs(data)
 
-      data.forEach( job => job.created_at = dateFormat(job.created_at))
-      setjobs(data)
+    setjobs(data.filter((job) => job.job_title.toLowerCase().includes(searchField.toLowerCase())))
+  };
+
+  // Initial Function
+  const fetchPost = async (pageNo) => {
+    setIsLoading(true);
+    let countTotalRecords = await supabase
+      .from('manage_jobs_view')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    let totalRecords = countTotalRecords.count;
+    let recordPerPage = rpp;
+    let totalPages = Math.ceil(totalRecords / recordPerPage);
+    setTotalPages(totalPages);
+    if (totalPages) {
+      let arrPage = [];
+      for (var i = 1; i <= totalPages; i++) {
+        arrPage.push(i);
+      }
+      setArrPages(arrPage);
+
+      let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
+      if (pageNo < 1) {
+        start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
+      }
+      let end_limit = parseInt(start_limit) + parseInt(rpp);
+      console.log("start_limit", start_limit, "end_limit", end_limit);
+      setCurrentPage(pageNo);
+
+      let { data, error } = await supabase
+        .from('manage_jobs_view')
+        .select()
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .range(start_limit, end_limit);
+
+      data.forEach(job => job.created_at = dateFormat(job.created_at))
+      setjobs(data);
+      setIsLoading(false);
+    }
   }
-  
+
+  const handleNextPage = (pageNo) => {
+    setIsLoading(true);
+    fetchPost(pageNo);
+  }
+
 
   useEffect(() => {
-    fetchPost();
+    setIsLoading(true);
+    fetchPost(currentPage);
   }, []);
 
   return (
@@ -145,18 +191,33 @@ const JobListingsTable = () => {
       <div className="widget-title">
         <h4>My Job Listings</h4>
 
-        
-        {jobs.length != 0 ?
+        {
+          isLoading &&
+          <div style={{ width: '20%', margin: "auto" }}>
+            <BallTriangle
+              height={100}
+              width={100}
+              radius={5}
+              color="#000"
+              ariaLabel="ball-triangle-loading"
+              wrapperClass={{}}
+              wrapperStyle=""
+              visible={true}
+            />
+          </div>
+        }
+
+        {isLoading == false  ?
           <div className="chosen-outer">
-          {/* <select className="chosen-single form-select chosen-container"> */}
+            {/* <select className="chosen-single form-select chosen-container"> */}
             {/* <option>All Status</option> */}
             {/* <option>Last 12 Months</option> */}
             {/* <option>Last 16 Months</option> */}
             {/* <option>Last 24 Months</option> */}
             {/* <option>Last 5 year</option> */}
-          {/* </select> */}
+            {/* </select> */}
 
-          {/* TODO: add search filters */} 
+            {/* TODO: add search filters */}
             <input
               className="chosen-single form-input chosen-container mx-3"
               type="text"
@@ -166,9 +227,9 @@ const JobListingsTable = () => {
               onChange={(e) => {
                 setSearchField(e.target.value);
               }}
-              style={{ minWidth: '450px'}}
+              style={{ minWidth: '450px' }}
             />
-{/*           
+            {/*           
           <select
             className="chosen-single form-select chosen-container mx-3"
             onChange={(e) => {
@@ -180,134 +241,180 @@ const JobListingsTable = () => {
             <option>Unpublished</option>
           </select> */}
 
-          <button
-            onClick={findJob}
-            className="btn btn-primary text-nowrap m-1"
-            style= {{ minHeight: '43px' }}
-          >
-            Search
-          </button>
-          <button
-            onClick={clearAll}
-            className="btn btn-danger text-nowrap m-1"
-            style= {{ minHeight: '43px' }}
-          >
-            Clear
-          </button>
-        </div> : '' }
+            <button
+              onClick={findJob}
+              className="btn btn-primary text-nowrap m-1"
+              style={{ minHeight: '43px' }}
+            >
+              Search
+            </button>
+            <button
+              onClick={clearAll}
+              className="btn btn-danger text-nowrap m-1"
+              style={{ minHeight: '43px' }}
+            >
+              Clear
+            </button>
+            <Link href={`/employers-dashboard/post-jobs`}>
+              <button
+                className="btn btn-success text-nowrap m-1"
+                style={{ minHeight: '43px' }}
+              >
+                Add New
+              </button>
+            </Link>
+
+          </div> : ''}
       </div>
       {/* End filter top bar */}
 
       {/* Start table widget content */}
-      {jobs.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom:40 }}><center>You have not posted any jobs yet!</center></p>: 
+      
         <div className="widget-content">
-        <div className="table-outer">
-          <table className="default-table manage-job-table">
-            <thead>
-              <tr>
-                <th>Job Title</th>
-                <th>Applications</th>
-                <th>Published On</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+        {isLoading == false && jobs.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom: 40 }}><center>You have not posted any jobs yet! </center></p> 
+            :
+          <div className="table-outer">
+            <table className="default-table manage-job-table">
+              <thead>
+                <tr>
+                  <th>Job Title</th>
+                  <th>Applications</th>
+                  <th>Published On</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {jobs.map((item) => (
-                <tr key={item.job_id}>
-                  <td>
-                    {/* <!-- Job Block --> */}
-                    <div className="job-block">
-                      <div className="inner-box">
-                        <div>
-                          {/* <span className="company-logo">
+              <tbody>
+                {jobs.map((item) => (
+                  <tr key={item.job_id}>
+                    <td>
+                      {/* <!-- Job Block --> */}
+                      <div className="job-block">
+                        <div className="inner-box">
+                          <div>
+                            {/* <span className="company-logo">
                             <img src={item.logo} alt="logo" />
                           </span> */}
-                          <h4>
-                            <Link href={`/employers-dashboard/edit-job/${item.job_id}`}>
-                              {item.job_title}
-                            </Link>
-                          </h4>
+                            <h4>
+                              <Link href={`/employers-dashboard/edit-job/${item.job_id}`}>
+                                {item.job_title}
+                              </Link>
+                            </h4>
                             <ul className="job-info">
-                              { item?.job_type ?
-                                  <li>
-                                    <span className="icon flaticon-clock-3"></span>
-                                    {item?.job_type}
-                                  </li>
-                                  : '' }
-                              { item?.job_address ?
-                                  <li>
-                                    <span className="icon flaticon-map-locator"></span>
-                                    {item?.job_address}
-                                  </li>
-                                  : '' }
+                              {item?.job_type ?
+                                <li>
+                                  <span className="icon flaticon-clock-3"></span>
+                                  {item?.job_type}
+                                </li>
+                                : ''}
+                              {item?.job_address ?
+                                <li>
+                                  <span className="icon flaticon-map-locator"></span>
+                                  {item?.job_address}
+                                </li>
+                                : ''}
                               {/* location info */}
-                              { item?.salary ?
-                                  <li>
-                                    <span className="icon flaticon-money"></span>{" "}
-                                   ${item?.salary} {item?.salary_rate}
-                                  </li>
-                                  : '' }
+                              {item?.salary ?
+                                <li>
+                                  <span className="icon flaticon-money"></span>{" "}
+                                  ${item?.salary} {item?.salary_rate}
+                                </li>
+                                : ''}
                               {/* salary info */}
                             </ul>
                             {/* End .job-info */}
 
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="applied">
-                    {/* <Link href="/employers-dashboard/all-applicants/${item.job_id}">3+ Applied</Link> */}
-                    <a onClick={()=>{
-                      router.push(`/employers-dashboard/all-applicants-view/${item.job_id}`)
-                    }}>
-                      {item.total_applicants > 0 ? `${item.total_applicants} applied` : 'No applications yet'}
-                    </a>
-                  </td>
-                  <td>
-                  {item?.created_at}
-                  </td>
-                  { item?.status == 'Published' ?
-                    <td className="status">{item.status}</td>
-                    : <td className="status" style={{ color: 'red' }}>{item.status}</td> }
-                  <td>
-                    <div className="option-box">
-                      <ul className="option-list">
-                        <li onClick={()=>{
-                          router.push(`/employers-dashboard/clone-job/${item.job_id}`)
-                        }}>
-                          <button data-text="Clone Job">
-                            <span className="la la-copy"></span>
-                          </button>
+                    </td>
+                    <td className="applied">
+                      {/* <Link href="/employers-dashboard/all-applicants/${item.job_id}">3+ Applied</Link> */}
+                      <a onClick={() => {
+                        router.push(`/employers-dashboard/all-applicants-view/${item.job_id}`)
+                      }}>
+                        {item.total_applicants > 0 ? `${item.total_applicants} applied` : 'No applications yet'}
+                      </a>
+                    </td>
+                    <td>
+                      {item?.created_at}
+                    </td>
+                    {item?.status == 'Published' ?
+                      <td className="status">{item.status}</td>
+                      : <td className="status" style={{ color: 'red' }}>{item.status}</td>}
+                    <td>
+                      <div className="option-box">
+                        <ul className="option-list">
+                          <li onClick={() => {
+                            router.push(`/employers-dashboard/clone-job/${item.job_id}`)
+                          }}>
+                            <button data-text="Clone Job">
+                              <span className="la la-copy"></span>
+                            </button>
+                          </li>
+                          <li onClick={() => {
+                            router.push(`/job/${item.job_id}`)
+                          }}>
+                            <button data-text="Preview Job">
+                              <span className="la la-eye"></span>
+                            </button>
+                          </li>
+                          <li onClick={() => { publishJob(item.job_id, item.status) }} >
+                            <button data-text="Publish Job">
+                              <span className="la la-check"></span>
+                            </button>
+                          </li>
+                          <li onClick={() => { unpublishJob(item.job_id, item.status) }}>
+                            <button data-text="Unpublish Job" disabled>
+                              <span className="la la-trash"></span>
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+
+                {
+                  isLoading == false && arrPages.length > 1 &&
+                  <nav className="ls-pagination">
+                    <ul>
+                      {
+                        currentPage > 1 && <li className="prev">
+                          <a onClick={() => handleNextPage(parseInt(currentPage) - parseInt(1))}>
+                            <i className="fa fa-arrow-left"></i>
+                          </a>
                         </li>
-                        <li onClick={()=>{
-                          router.push(`/job/${item.job_id}`)
-                        }}>
-                          <button data-text="Preview Job">
-                            <span className="la la-file-alt"></span>
-                          </button>
+                      }
+
+                      {
+                        arrPages.map(item => {
+                          return (
+                            <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                          )
+                        })
+                      }
+
+                      {
+                        currentPage < totalPages && <li className="next">
+                          <a onClick={() => handleNextPage(parseInt(currentPage) + parseInt(1))}>
+                            <i className="fa fa-arrow-right"></i>
+                          </a>
                         </li>
-                        <li onClick={()=>{ publishJob(item.job_id, item.status) }} >
-                          <button data-text="Publish Job">
-                            <span className="la la-check"></span>
-                          </button>
-                        </li>
-                        <li onClick={()=>{ unpublishJob(item.job_id, item.status) }}>
-                          <button data-text="Unpublish Job" disabled>
-                            <span className="la la-trash"></span>
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      }
+
+                    </ul>
+                  </nav>
+                }
+
+
+              </tbody>
+            </table>
+          </div>
+          }
         </div>
-        </div>
-      }
+      
       {/* End table widget content */}
     </div>
   );
