@@ -64,7 +64,7 @@ const AllApplicantsViewPerJob = () => {
               {/* <!-- Ls widget --> */}
               <div className="ls-widget">
                 <div className="tabs-box">
-                  <div className="widget-title">
+                  <div className="widget-title1">
                     {/* <h4>Applicants who applied in</h4> */}
                     {/* <WidgetTopFilterBox /> */}
                   </div>

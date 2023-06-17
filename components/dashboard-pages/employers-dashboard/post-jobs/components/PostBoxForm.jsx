@@ -131,7 +131,6 @@ const submitJobPost = async (
         setJobData(JSON.parse(JSON.stringify(addJobFields)))
 
         setTimeout(() => {
-          //alert("Timeout called");
           Router.push("/employers-dashboard/manage-jobs")
       }, 3000);
         
@@ -139,7 +138,7 @@ const submitJobPost = async (
         // open toast
         toast.error('Error while saving your job application, Please try again later or contact tech support', {
             position: "bottom-right",
-            autoClose: false,
+            autoClose: true,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
@@ -153,7 +152,7 @@ const submitJobPost = async (
         // open toast
         toast.error('Please fill all the required fields.', {
             position: "top-center",
-            autoClose: false,
+            autoClose: true,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,

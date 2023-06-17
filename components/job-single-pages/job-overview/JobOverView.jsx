@@ -47,14 +47,14 @@ const JobOverView = ({ company }) => {
             : '' }
         { company?.experience ?
             <li>
-              <i className="icon icon-experience"></i>
+              <i className="icon icon-calendar"></i>
               <h5>Experience:</h5>
               <span>{company?.experience}</span>
             </li>
             : '' }
         { company?.education ?
             <li>
-              <i className="icon icon-education"></i>
+              <i className="icon icon-degree"></i>
               <h5>Education:</h5>
               <span>{company?.education}</span>
             </li>
