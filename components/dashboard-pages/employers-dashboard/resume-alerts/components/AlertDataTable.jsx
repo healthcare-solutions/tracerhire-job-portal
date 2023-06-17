@@ -141,7 +141,12 @@ const AlertDataTable = () => {
           <div>
             <div className="search-box-one">
               <form method="post" action="blog.html">
+              
+              <div className="form-group pull-left mb-3">
+              <h4>Resume Alerts!</h4>
+              </div>
                 <div className="form-group pull-right mb-3">
+                
                   <span className="icon flaticon-search-1"></span>
                   <input
                     type="search"

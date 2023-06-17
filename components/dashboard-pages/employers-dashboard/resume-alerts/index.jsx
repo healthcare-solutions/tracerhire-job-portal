@@ -38,7 +38,7 @@ const index = () => {
             <div className="col-lg-12">
               <div className="ls-widget">
                 <div className="tabs-box">
-                  <div className="widget-title">
+                  <div className="widget-title1" style={{paddingTop:"20px"}}>
                   </div>
                   {/* End widget-title */}
 

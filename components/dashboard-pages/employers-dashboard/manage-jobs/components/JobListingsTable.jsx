@@ -171,8 +171,9 @@ const JobListingsTable = () => {
 
       data.forEach(job => job.created_at = dateFormat(job.created_at))
       setjobs(data);
-      setIsLoading(false);
+      
     }
+    setIsLoading(false);
   }
 
   const handleNextPage = (pageNo) => {
