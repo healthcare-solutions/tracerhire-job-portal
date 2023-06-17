@@ -200,26 +200,26 @@ const ApplyJobModalContent = ({ company }) => {
 
             const fileBase64 = await toBase64(selectedFile)
 
-            // axios({
-            //   method: 'POST',
-            //   url: '/api/mail',
-            //   data: {
-            //     name: user.name,
-            //     redirectionUrl: `https://immensecareer.com`,
-            //     time: time.toLocaleString('en-US'),
-            //     jobId: jobId,
-            //     jobTitle: company.job_title,
-            //     jobCompAdd: company.job_comp_add,
-            //     attachments: [
-            //       {
-            //         content: fileBase64,
-            //         filename: selectedFile.name,
-            //         type: selectedFile.type,
-            //         disposition: "attachment"
-            //       }
-            //     ]
-            //   }
-            // })       
+            axios({
+              method: 'POST',
+              url: '/api/mail',
+              data: {
+                name: user.name,
+                redirectionUrl: `https://immensecareer.com`,
+                time: time.toLocaleString('en-US'),
+                jobId: jobId,
+                jobTitle: company.job_title,
+                jobCompAdd: company.job_comp_add,
+                attachments: [
+                  {
+                    content: fileBase64,
+                    filename: selectedFile.name,
+                    type: selectedFile.type,
+                    disposition: "attachment"
+                  }
+                ]
+              }
+            })       
             // open toast
             toast.success('Successfully Applied in this job!', {
               position: "bottom-right",
