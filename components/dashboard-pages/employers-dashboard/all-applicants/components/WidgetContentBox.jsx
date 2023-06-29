@@ -41,7 +41,7 @@ const WidgetContentBox = () => {
                 .from('applications')
                 .select("*")
                 .like('name', '%' + searchField + '%')
-                .eq('cust_id', user.id)
+                //.eq('cust_id', user.id)
                 .eq('status', jobStatus)
                 .order('created_at', { ascending: false });
             if (data) {
@@ -55,7 +55,7 @@ const WidgetContentBox = () => {
                 .from('applications')
                 .select("*")
                 .like('name', '%' + searchField + '%')
-                .eq('cust_id', user.id)
+                //.eq('cust_id', user.id)
                 .order('created_at', { ascending: false });
             if (data) {
                 data.forEach(applicant => applicant.created_at = dateFormat(applicant.created_at))
@@ -68,7 +68,7 @@ const WidgetContentBox = () => {
                 .from('applications')
                 .select("*")
                 .eq('status', jobStatus)
-                .eq('cust_id', user.id)
+                //.eq('cust_id', user.id)
                 .order('created_at', { ascending: false });
             if (data) {
                 data.forEach(applicant => applicant.created_at = dateFormat(applicant.created_at))
@@ -84,7 +84,7 @@ const WidgetContentBox = () => {
             let countTotalRecords = await supabase
                 .from('applications')
                 .select('*', { count: 'exact', head: true })
-                .eq('cust_id', user.id);
+                //.eq('cust_id', user.id);
             let totalRecords = countTotalRecords.count;
             
             let recordPerPage = rpp;
@@ -111,7 +111,7 @@ const WidgetContentBox = () => {
                 let { data: allApplicantsView, error } = await supabase
                     .from('applications')
                     .select("*")
-                    .eq('cust_id', user.id)
+                    //.eq('cust_id', user.id)
                     .order('created_at', { ascending: false })
                     .range(start_limit, end_limit);
                 
