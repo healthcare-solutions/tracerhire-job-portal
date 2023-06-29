@@ -1,4 +1,5 @@
 import GoogleMapReact from "google-map-react";
+const apiKey = process.env.NEXT_PUBLIC_JOB_PORTAL_GMAP_API_KEY;
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
@@ -15,7 +16,7 @@ export default function Map() {
     // Important! Alwys set the container height explicitlya
 
     <GoogleMapReact
-      bootstrapURLKeys={{ key: "" }}
+      bootstrapURLKeys={{ key: apiKey }}
       defaultCenter={defaultProps.center}
       defaultZoom={defaultProps.zoom}
     >

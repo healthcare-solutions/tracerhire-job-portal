@@ -1,12 +1,57 @@
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import MobileSidebar from "./mobile-sidebar";
+import { supabase } from "../../config/supabaseClient";
+import Router, { useRouter } from "next/router";
 
 const MobileMenu = () => {
     const user = useSelector((state) => state.candidate.user);
+    console.log("user",user);
     const showLoginButton = useMemo(() => !user?.id, [user]);
+    const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
+
+    const fetchUserUnreadMessages = async () => {
+
+        let total_unread = 0;
+
+        const fetchToData = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .is('seen_time', null)
+            .eq('to_user_id', user.id);
+
+        const fetchFromData = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .is('seen_time', null)
+            .eq('from_user_id', user.id);
+
+        if (fetchToData.count > 0) {
+            total_unread += fetchToData.count;
+        }
+        if (fetchFromData.count > 0) {
+            total_unread += fetchFromData.count;
+        }
+        //console.log("total_unread", total_unread);
+        if (total_unread > 0) {
+            setTotalUnreadMessages(total_unread);
+        }
+    }
+
+    useEffect(() => {
+        fetchUserUnreadMessages();
+    }, []);
+
+    const handleNavigateToMessage = () => {
+        if(user.role == 'ADMIN'){
+            Router.push("/employers-dashboard/messages")
+        } else {
+            Router.push("/candidates-dashboard/messages")
+        }
+    }
 
     return (
         // <!-- Main Header-->
@@ -53,8 +98,21 @@ const MobileMenu = () => {
                             //     <span className="flaticon-menu-1"></span>
                             // </a>
                             <div
+                                style={{display:'inline-flex'}}
                                 data-bs-toggle="offcanvas"
                                 data-bs-target="#offcanvasMenu">
+                                {
+                                    totalUnreadMessages > 0 && <span>
+                                        <a onClick={() => handleNavigateToMessage()}>
+                                            <button className="menu-btn" style={{marginRight:20}}>
+                                                <span className="count">{totalUnreadMessages}</span>
+                                                <span className="icon la la-envelope"></span>
+                                            </button>
+                                        
+                                        </a>
+                                    </span>
+                                }
+
                                 <Image
                                     alt="avatar"
                                     className="thumb"
@@ -64,10 +122,10 @@ const MobileMenu = () => {
                                     style={{ marginTop: '-5px' }}
                                 />
                                 <span
-                                    style={{ marginLeft: '8px' }}
-                                    className="name dropdown-toggle">Hello, 
-                                </span><br />
-                                <span>{ user.name }</span>
+                                    style={{ marginLeft: '10px' }}
+                                    className="name dropdown-toggle1">
+                                </span>
+                                <span>{user.name}</span>
                             </div>
                         }
                     </div>

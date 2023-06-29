@@ -77,6 +77,10 @@ export default function handler(req, res) {
                     <b>Applicant Name: </b>
                     <span>${req.body.name}</span>
                   </li>
+                  <li>
+                    <b>Applied In Center: </b>
+                    <span>${req.body.jobCompAdd}</span>
+                  </li>
                 </ul>
                 <p>Note: Please login with your employer credentials to access link</p>
                 <a href="${req.body.redirectionUrl}"><button>Log in to view</button></a>

@@ -1,5 +1,6 @@
 import Map from "../../../Map";
 import Select from "react-select";
+import Router, { useRouter } from "next/router";
 import { addDoc, collection, getFirestore } from "firebase/firestore";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
@@ -102,6 +103,7 @@ const submitJobPost = async (
             .insert([
               { 
                 user_id: user.id,
+                cust_id: user.id,
                 job_title: jobTitle,
                 job_desc: jobDesc,
                 job_type: jobType,
@@ -127,12 +129,16 @@ const submitJobPost = async (
             theme: "colored",
         });
         setJobData(JSON.parse(JSON.stringify(addJobFields)))
+
+        setTimeout(() => {
+          Router.push("/employers-dashboard/manage-jobs")
+      }, 3000);
         
       } catch (err) {
         // open toast
         toast.error('Error while saving your job application, Please try again later or contact tech support', {
             position: "bottom-right",
-            autoClose: false,
+            autoClose: true,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
@@ -146,7 +152,7 @@ const submitJobPost = async (
         // open toast
         toast.error('Please fill all the required fields.', {
             position: "top-center",
-            autoClose: false,
+            autoClose: true,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
@@ -158,6 +164,7 @@ const submitJobPost = async (
 };
 
 const PostBoxForm = () => {
+  //useRouter().push("/employers-dashboard/manage-jobs");
   // const [jobTitle, setJobTitle] = useState("");
   // const [jobDesc, setJobDesc] = useState("");
   //const [email, setEmail] = useState("");

@@ -24,7 +24,7 @@ const initialState = {
         sort: "",
         perPage: {
             start: 0,
-            end: 0,
+            end: 10,
         },
     },
 };

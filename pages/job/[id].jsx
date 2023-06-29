@@ -184,7 +184,7 @@ const JobSingleDynamicV1 = () => {
 
                     : ''}
 
-                { !showLoginButton && !isUserApplied ?
+                { !showLoginButton && !isUserApplied && user.role == 'CANDIDATE' ?
                     <div className="btn-box">
                       <a
                         href="#"

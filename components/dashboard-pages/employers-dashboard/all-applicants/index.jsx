@@ -40,8 +40,8 @@ const index = () => {
               {/* <!-- Ls widget --> */}
               <div className="ls-widget">
                 <div className="tabs-box">
-                  <div className="widget-title">
-                    <h4>Applicants</h4>
+                  <div className="widget-title1">
+                    {/* <h4>Applicants</h4> */}
                     {/* <WidgetTopFilterBox /> */}
                   </div>
                   {/* End top widget filter bar */}

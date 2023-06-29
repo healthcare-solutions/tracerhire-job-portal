@@ -25,54 +25,80 @@ const FilterJobBox = () => {
   const [jobs, setJobs] = useState([]);
   const searchTerm = useSelector((state) => state.search.searchTerm)
   const searchAddress = useSelector((state) => state.search.searchAddress)
+  const pageSize = useSelector((state) => state.filter.jobSort.perPage.end)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalRecords, setTotalRecords] = useState(0)
+  const [noOfPage, setNoOfPages] = useState(0)
+  const handlePageChange = (currentPage) => {
+    setCurrentPage(currentPage)
+  }
 
-  const searchJobsWithTermAndAddress = async () => {
-    await supabase.from('jobs').select()
-    .eq('status', 'Published')
-    .ilike('job_title', '%'+searchTerm+'%')
-    .ilike('job_address', '%'+searchAddress+'%')
-    .then((res) => {
-      setJobs(res.data)
-    })
-  };
+  // const searchJobsWithTermAndAddress = async () => {
+  //   await supabase.from('jobs').select('*', {count: 'exact'})
+  //   .eq('status', 'Published')
+  //   .ilike('job_title', '%'+searchTerm+'%')
+  //   .ilike('job_address', '%'+searchAddress+'%')
+  //   .then((res) => {
+  //     setJobs(res.data)
+  //   })
+  // };
 
-  const searchJobsWithTerm = async () => {
-    await supabase.from('jobs').select()
-    .eq('status', 'Published')
-    .ilike('job_title', '%'+searchTerm+'%')
-    .then((res) => {
-      setJobs(res.data)
-    })
-  };
+  // const searchJobsWithTerm = async () => {
+  //   await supabase.from('jobs').select('*', {count: 'exact'})
+  //   .eq('status', 'Published')
+  //   .ilike('job_title', '%'+searchTerm+'%')
+  //   .then((res) => {
+  //     setJobs(res.data)
+  //   })
+  // };
 
-  const searchJobsWithAddress = async () => {
-    await supabase.from('jobs').select()
-    .eq('status', 'Published')
-    .ilike('job_address', '%'+searchAddress+'%')
-    .then((res) => {
-      setJobs(res.data)
-    })
-  };
+  // const searchJobsWithAddress = async () => {
+  //   await supabase.from('jobs').select('*', {count: 'exact'})
+  //   .eq('status', 'Published')
+  //   .ilike('job_address', '%'+searchAddress+'%')
+  //   .then((res) => {
+  //     setJobs(res.data)
+  //   })
+  // };
 
   const searchJobs = async () => {
-    console.log("No search call");
-    await supabase.from('jobs').select()
-    .eq('status', 'Published')
-    .then((res) => {
+
+    let query = supabase.from('jobs').select('*', {count: 'exact'})
+    if(searchAddress) query = query.ilike('job_address', '%'+searchAddress+'%')
+    if(searchTerm) query = query.ilike('job_title', '%'+searchTerm+'%')
+    query = query.eq('status', 'Published')
+    query = query.order('created_at',  { ascending: sort == 'des' })
+    query = query.range((currentPage - 1) * pageSize, (currentPage * pageSize) - 1)
+
+    // const {data, error} = await query
+    // if(data) {
+    //   console.log(data)
+    //   setJobs(data)
+    // }
+
+    query.then(res => {
       setJobs(res.data)
+      setTotalRecords(res.count)
+      setNoOfPages(Math.ceil(res.count / pageSize))
     })
+
+    // await supabase.from('jobs').select('*', {count: 'exact'})
+    // .eq('status', 'Published')
+    // .then((res) => {
+    //   setJobs(res.data)
+    // })
   };
 
   useEffect(() => {
-    if(searchAddress == "" && searchTerm == '') 
+    // if(searchAddress == "" && searchTerm == '') 
       searchJobs()
-    else if(searchAddress == "") 
-      searchJobsWithTerm()
-    else if(searchTerm == "") 
-      searchJobsWithAddress()
-    else 
-      searchJobsWithTermAndAddress()
-  }, [searchAddress, searchTerm]);
+    // else if(searchAddress == "") 
+    //   searchJobsWithTerm()
+    // else if(searchTerm == "") 
+    //   searchJobsWithAddress()
+    // else 
+    //   searchJobsWithTermAndAddress()
+  }, [searchAddress, searchTerm, currentPage, pageSize]);
 
   const { jobList, jobSort } = useSelector((state) => state.filter);
   const {
@@ -238,6 +264,7 @@ const FilterJobBox = () => {
   const perPageHandler = (e) => {
     const pageData = JSON.parse(e.target.value);
     dispatch(addPerPage(pageData));
+    setCurrentPage(1)
   };
 
   // clear all filters
@@ -250,7 +277,7 @@ const FilterJobBox = () => {
     dispatch(addExperienceSelect(""));
     dispatch(addSalary({ min: 0, max: 20000 }));
     dispatch(addSort(""));
-    dispatch(addPerPage({ start: 0, end: 0 }));
+    dispatch(addPerPage({ start: 0, end: 10 }));
   };
 
   // useEffect(() => {
@@ -365,15 +392,12 @@ const FilterJobBox = () => {
     
   }
   useEffect(() => {
+    if(sort !== '' || jobTypeSelect !== "" || datePosted !== "")
     fnCall()
   }, [jobTypeSelect, sort, datePosted])
 
   // 
-  const [currentPage, setCurrentPage] = useState(1)
-  const handlePageChange = (currentPage) => {
-    setCurrentPage(currentPage)
-    console.log(currentPage)
-  }
+  
   return (
     <>
       <div className="ls-switcher">
@@ -391,7 +415,7 @@ const FilterJobBox = () => {
           salary?.max !== 20000 ||
           sort !== "" ||
           perPage.start !== 0 ||
-          perPage.end !== 0 ? (
+          perPage.end !== 10 ? (
             <button
               onClick={clearAll}
               className="btn btn-danger text-nowrap me-2"
@@ -427,14 +451,6 @@ const FilterJobBox = () => {
             <option
               value={JSON.stringify({
                 start: 0,
-                end: 0,
-              })}
-            >
-              All
-            </option>
-            <option
-              value={JSON.stringify({
-                start: 0,
                 end: 10,
               })}
             >
@@ -466,7 +482,12 @@ const FilterJobBox = () => {
       <div className="row">{content}</div>
       {/* End .row with jobs */}
 
-      <Pagination handlePageChange={handlePageChange} currentPage={currentPage}/>
+      {
+        totalRecords > 0 ? 
+        <Pagination handlePageChange={handlePageChange} currentPage={currentPage} noOfPage={noOfPage} />
+        : <p><center><strong> No jobs found</strong></center></p>
+      }
+      
       {/* <!-- End Pagination --> */}
     </>
   );

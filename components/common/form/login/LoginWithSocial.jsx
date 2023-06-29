@@ -37,8 +37,14 @@ const signInWithGoogle = async (dispatch) => {
     //   });
     // }
 
+    const dateFormat = () => {
+      const date = new Date()
+      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + date.getFullYear()
+  }
+
     const fetchUser = await supabase.from('users').select().ilike('user_id', user.uid)
     let userData = {}
+    let custData = {}
     if(fetchUser.data.length == 0) {
       userData = { 
         user_id: user.uid,
@@ -49,7 +55,14 @@ const signInWithGoogle = async (dispatch) => {
         phone_number: user.phoneNumber,
         role: 'CANDIDATE'
       }
+      custData = { 
+        cust_id: user.uid,
+        created_at: dateFormat(),
+        email: user.email,
+        phone: user.phoneNumber
+      }
       const { data, error } = await supabase.from('users').insert([userData])
+      const { dataCompany, errorCompany } = await supabase.from('cust_dtl').insert([custData])
     } else {
       userData = fetchUser.data[0]
     }

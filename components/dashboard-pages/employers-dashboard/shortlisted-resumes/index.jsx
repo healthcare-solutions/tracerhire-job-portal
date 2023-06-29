@@ -29,7 +29,7 @@ const index = () => {
       {/* <!-- Dashboard --> */}
       <section className="user-dashboard">
         <div className="dashboard-outer">
-          <BreadCrumb title="Shortlisted Resumes!" />
+          <BreadCrumb title="Candidate Lists!" />
           {/* breadCrumb */}
 
           <MenuToggler />
@@ -39,8 +39,8 @@ const index = () => {
             <div className="col-lg-12">
               <div className="applicants-widget ls-widget">
                 <div className="widget-title">
-                  <h4>Shorlist Resumes</h4>
-                  <WidgetToFilterBox />
+                  <h4>Candidates</h4>
+                  {/* <WidgetToFilterBox /> */}
                 </div>
                 {/* End widget top filter box */}
                 <WidgetContentBox />

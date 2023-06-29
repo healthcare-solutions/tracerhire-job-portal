@@ -21,7 +21,7 @@ const ApplicantWidgetContentBox = () => {
       try{
         if (id) {
           let { data: allApplicantsView, error } = await supabase
-              .from('applicants_view')
+              .from('applications_view')
               .select("*")
   
               // Filters
@@ -55,7 +55,7 @@ const ApplicantWidgetContentBox = () => {
 
     const ViewCV = async (applicationId) => {
         const { data, error } = await supabase
-              .from('applicants_view')
+              .from('applications_view')
               .select('*')
               .eq('application_id', applicationId)
 
@@ -183,7 +183,6 @@ const ApplicantWidgetContentBox = () => {
             });
         }
     }
-
     return (
         <div className="tabs-box">
             <div className="widget-title">
@@ -198,6 +197,7 @@ const ApplicantWidgetContentBox = () => {
             </h4>
 
             <div className="chosen-outer">
+            <Link href={'/employers-dashboard/manage-jobs'} className="btn btn-primary text-nowrap m-1">Back</Link>
                 {/* <!--Tabs Box--> */}
     {/*
                 <select className="chosen-single form-select">
@@ -213,7 +213,7 @@ const ApplicantWidgetContentBox = () => {
             {/* End filter top bar */}
 
             {/* Start table widget content */}
-            {fetchedAllApplicants.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500' }}><center>No applicant applied to this job!</center></p>: 
+            {fetchedAllApplicants.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500' , paddingBottom:40 }}><center>No applicant applied to this job!</center></p>: 
             <div className="widget-content">
             <div className="table-outer">
                 <table className="default-table manage-job-table">
@@ -238,10 +238,9 @@ const ApplicantWidgetContentBox = () => {
                                 <img src={item.logo} alt="logo" />
                                 </span> */}
                                 <h4>
-                                {/* <Link href={`/employers-dashboard/edit-job/${applicant.user_id}`}>
+                                <Link href={`/candidates-single-v1/${applicant.user_id}`}>
                                     {applicant.name}
-                                </Link> */}
-                                {applicant.name}
+                                </Link>
                                 </h4>
                             </div>
                         </div>
