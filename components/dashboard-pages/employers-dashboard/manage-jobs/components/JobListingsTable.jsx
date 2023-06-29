@@ -129,7 +129,7 @@ const JobListingsTable = () => {
     let { data, error } = await supabase
       .from('manage_jobs_view')
       .select()
-      .eq('user_id', user.id)
+      //.eq('user_id', user.id)
       .order('created_at', { ascending: false });
     data.forEach(job => job.created_at = dateFormat(job.created_at))
     setjobs(data)
@@ -148,7 +148,7 @@ const JobListingsTable = () => {
       .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
       .like('job_title', '%' + searchField + '%')
       .eq('status', jobStatus)
-      .eq('user_id', user.id);
+      //.eq('user_id', user.id);
       let totalRecords = countTotalRecords.count;
       let recordPerPage = rpp;
       let totalPages = Math.ceil(totalRecords / recordPerPage);
@@ -170,7 +170,7 @@ const JobListingsTable = () => {
         let { data, error } = await supabase
           .from('manage_jobs_view')
           .select()
-          .eq('user_id', user.id)
+          //.eq('user_id', user.id)
           .like('job_title', '%' + searchField + '%')
           .eq('status', jobStatus)
           .order('created_at', { ascending: false })
@@ -186,8 +186,8 @@ const JobListingsTable = () => {
       let countTotalRecords = await supabase
       .from('manage_jobs_view')
       .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
-      .like('job_title', '%' + searchField + '%')
-      .eq('user_id', user.id);
+      .like('job_title', '%' + searchField + '%');
+      //.eq('user_id', user.id)
       let totalRecords = countTotalRecords.count;
       let recordPerPage = rpp;
       let totalPages = Math.ceil(totalRecords / recordPerPage);
@@ -210,7 +210,7 @@ const JobListingsTable = () => {
         let { data, error } = await supabase
           .from('manage_jobs_view')
           .select()
-          .eq('user_id', user.id)
+          //.eq('user_id', user.id)
           .like('job_title', '%' + searchField + '%')
           .order('created_at', { ascending: false })
           .range(start_limit, end_limit);
@@ -225,8 +225,8 @@ const JobListingsTable = () => {
       let countTotalRecords = await supabase
       .from('manage_jobs_view')
       .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
-      .eq('status', jobStatus)
-      .eq('user_id', user.id);
+      .eq('status', jobStatus);
+      //.eq('user_id', user.id);
       let totalRecords = countTotalRecords.count;
       let recordPerPage = rpp;
       let totalPages = Math.ceil(totalRecords / recordPerPage);
@@ -249,7 +249,7 @@ const JobListingsTable = () => {
         let { data, error } = await supabase
           .from('manage_jobs_view')
           .select()
-          .eq('user_id', user.id)
+          //.eq('user_id', user.id)
           .eq('status', jobStatus)
           .order('created_at', { ascending: false })
           .range(start_limit, end_limit);
@@ -263,8 +263,8 @@ const JobListingsTable = () => {
       console.log("else");
       let countTotalRecords = await supabase
       .from('manage_jobs_view')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .select('*', { count: 'exact', head: true });
+      //.eq('user_id', user.id);
       let totalRecords = countTotalRecords.count;
       let recordPerPage = rpp;
       let totalPages = Math.ceil(totalRecords / recordPerPage);
@@ -286,7 +286,7 @@ const JobListingsTable = () => {
         let { data, error } = await supabase
           .from('manage_jobs_view')
           .select()
-          .eq('user_id', user.id)
+          //.eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .range(start_limit, end_limit);
 
