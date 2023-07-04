@@ -9,32 +9,34 @@ import Router, { useRouter } from "next/router";
 
 const MobileMenu = () => {
     const user = useSelector((state) => state.candidate.user);
-    console.log("user",user);
+    //console.log("user",user);
     const showLoginButton = useMemo(() => !user?.id, [user]);
     const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
 
     const fetchUserUnreadMessages = async () => {
 
         let total_unread = 0;
-
+        const fetchFromData = [];
+        
         const fetchToData = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .is('seen_time', null)
             .eq('to_user_id', user.id);
 
-        const fetchFromData = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .is('seen_time', null)
-            .eq('from_user_id', user.id);
+        // const fetchFromData = await supabase
+        //     .from('messages')
+        //     .select('*', { count: 'exact', head: true })
+        //     .is('seen_time', null)
+        //     .eq('from_user_id', user.id);
+        //console.log("fetchFromData",fetchFromData);
 
         if (fetchToData.count > 0) {
             total_unread += fetchToData.count;
         }
-        if (fetchFromData.count > 0) {
-            total_unread += fetchFromData.count;
-        }
+        // if (fetchFromData.count > 0) {
+        //     total_unread += fetchFromData.count;
+        // }
         //console.log("total_unread", total_unread);
         if (total_unread > 0) {
             setTotalUnreadMessages(total_unread);

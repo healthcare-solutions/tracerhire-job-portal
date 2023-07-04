@@ -64,8 +64,18 @@ const FormInfoBox = () => {
           .select(`*`)
           .eq('cust_id', userID)
 
+          let customerName = "";
+          let userData = await supabase
+          .from('users')
+          .select(`name`)
+          .eq('user_id', userID);
+          if(userData){
+            customerName = userData.data[0].name;
+          }
+
         if (customer) {
           setCustomerDtlId(customer[0].cust_dtl_id);
+          setNameForm(customerName);
           setJobTitleForm(customer[0].company_name);
           setPhoneForm(customer[0].phone);
           setEmailForm(customer[0].email);
@@ -81,11 +91,9 @@ const FormInfoBox = () => {
           setDescriptionForm(customer[0].description);
 
           let all_departments = customer[0].departments;
-          console.log("Departments ===>",customer[0].departments);
           let arrSelectedDepartments = [];
           if (all_departments != null) {
             all_departments = all_departments.split(",");
-            console.log("all_departments ===>",all_departments);
             all_departments.map((item) => {
               catOptions.map((defined_item, index) => {
                 if (defined_item.label == item) {
@@ -95,7 +103,6 @@ const FormInfoBox = () => {
               })
             });
             if (arrSelectedDepartments.length > 0) {
-              console.log("Final Departments",arrSelectedDepartments);
               setCategoriesForm(arrSelectedDepartments);
             }
           }
@@ -140,6 +147,14 @@ const FormInfoBox = () => {
             })
             .eq('cust_dtl_id', customerDtlId);
             console.log("Updated Data ===>", data);
+
+
+            const { userData, userDrror } = await supabase
+            .from('users')
+            .update({
+              name: nameForm
+            }).eq('user_id', user.id);
+            console.log("User Data ===>", userData);
         
         // open toast
         toast.success('Your Profile Updated successfully', {
@@ -193,7 +208,7 @@ const FormInfoBox = () => {
       <div className="row">
         {/* <!-- Input --> */}
         <div className="form-group col-lg-6 col-md-12">
-          <label>Full Name</label>
+          <label>Full Name <span className="required">(required)</span></label>
           <input
             type="text"
             name="name"
@@ -206,7 +221,7 @@ const FormInfoBox = () => {
 
         {/* <!-- Input --> */}
         <div className="form-group col-lg-6 col-md-12">
-          <label>Job Title</label>
+          <label>Job Title <span className="required">(required)</span></label>
           <input
             type="text"
             name="jobtitle"
@@ -219,7 +234,7 @@ const FormInfoBox = () => {
 
         {/* <!-- Input --> */}
         <div className="form-group col-lg-6 col-md-12">
-          <label>Phone</label>
+          <label>Phone <span className="required">(required)</span></label>
           <input
             type="text"
             name="phone"
@@ -232,10 +247,11 @@ const FormInfoBox = () => {
 
         {/* <!-- Input --> */}
         <div className="form-group col-lg-6 col-md-12">
-          <label>Email address</label>
+          <label>Email address <span className="required">(required)</span></label>
           <input
             type="text"
             name="email"
+            readOnly
             value={emailForm}
             placeholder="E-mail"
             required

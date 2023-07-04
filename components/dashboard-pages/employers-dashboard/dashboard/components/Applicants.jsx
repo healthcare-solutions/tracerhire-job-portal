@@ -22,14 +22,22 @@ const Applicants = () => {
     setIsLoading(true);
     let dataRecentApplicants = await supabase
       .from('applications_view')
-      .select('application_id,name,job_title')
-      .eq('user_id', user.id)
+      .select('*')
+      //.eq('user_id', user.id)
       //.not('status',"eq",'Qualified');
       //.is('deleted', null)
       .order('created_at', { ascending: false })
-      .range(0, 2);
-    if (dataRecentApplicants && dataRecentApplicants.data.length > 0) {
-      setRecentApplicants(dataRecentApplicants.data);
+      .range(0, 10);
+    if (dataRecentApplicants) {
+
+      // Make Record Unique Start //
+      const unique = dataRecentApplicants.data.filter(
+        (obj, index) =>
+        dataRecentApplicants.data.findIndex((item) => item.user_id === obj.user_id) === index
+      );
+      // Make Record Unique Over //
+
+      setRecentApplicants(unique);
       setIsLoading(false);
     }
   }

@@ -1,6 +1,7 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/router";
+//import Router from "next/router";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { db } from "../../../../common/form/firebase";
@@ -116,7 +117,8 @@ const JobListingsTable = () => {
   const clearAll = () => {
     setSearchField('');
     setJobStatus('');
-    fetchPost(currentPage)
+    //router.push("/employers-dashboard/manage-jobs");
+      fetchPost(currentPage);  
   };
 
   const handleAddNew = () => {
@@ -140,20 +142,20 @@ const JobListingsTable = () => {
   // Initial Function
   const fetchPost = async (pageNo) => {
     setIsLoading(true);
-    
+    console.log("jobStatus ==>",jobStatus);
     if (searchField != '' && jobStatus != '') {
       console.log("if");
       let countTotalRecords = await supabase
       .from('manage_jobs_view')
       .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
       .like('job_title', '%' + searchField + '%')
-      .eq('status', jobStatus)
+      .eq('status', jobStatus);
       //.eq('user_id', user.id);
       let totalRecords = countTotalRecords.count;
       let recordPerPage = rpp;
       let totalPages = Math.ceil(totalRecords / recordPerPage);
       setTotalPages(totalPages);
-      if (totalPages) {
+      //if (totalPages) {
         let arrPage = [];
         for (var i = 1; i <= totalPages; i++) {
           arrPage.push(i);
@@ -178,7 +180,7 @@ const JobListingsTable = () => {
 
         data.forEach(job => job.created_at = dateFormat(job.created_at))
         setjobs(data);  
-      }
+      //}
       setIsLoading(false);
 
     } else if (searchField != '') {
@@ -187,12 +189,12 @@ const JobListingsTable = () => {
       .from('manage_jobs_view')
       .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
       .like('job_title', '%' + searchField + '%');
-      //.eq('user_id', user.id)
+      //.eq('user_id', user.id);
       let totalRecords = countTotalRecords.count;
       let recordPerPage = rpp;
       let totalPages = Math.ceil(totalRecords / recordPerPage);
       setTotalPages(totalPages);
-      if (totalPages) {
+      //if (totalPages) {
         let arrPage = [];
         for (var i = 1; i <= totalPages; i++) {
           arrPage.push(i);
@@ -216,22 +218,23 @@ const JobListingsTable = () => {
           .range(start_limit, end_limit);
 
         data.forEach(job => job.created_at = dateFormat(job.created_at))
-        setjobs(data);  
-      }
+        setjobs(data);
+      //}
       setIsLoading(false);
 
     } else if (jobStatus != '') {
       console.log("else if 2");
       let countTotalRecords = await supabase
       .from('manage_jobs_view')
-      .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
+      .select('*', { count: 'exact', head: true })
       .eq('status', jobStatus);
       //.eq('user_id', user.id);
       let totalRecords = countTotalRecords.count;
+      console.log("totalRecords",totalRecords);
       let recordPerPage = rpp;
       let totalPages = Math.ceil(totalRecords / recordPerPage);
       setTotalPages(totalPages);
-      if (totalPages) {
+      //if (totalPages) {
         let arrPage = [];
         for (var i = 1; i <= totalPages; i++) {
           arrPage.push(i);
@@ -245,7 +248,7 @@ const JobListingsTable = () => {
         let end_limit = parseInt(start_limit) + parseInt(rpp);
         console.log("start_limit", start_limit, "end_limit", end_limit);
         setCurrentPage(pageNo);
-
+        console.log("jobStatus",jobStatus);
         let { data, error } = await supabase
           .from('manage_jobs_view')
           .select()
@@ -256,7 +259,7 @@ const JobListingsTable = () => {
 
         data.forEach(job => job.created_at = dateFormat(job.created_at))
         setjobs(data);  
-      }
+      //}
       setIsLoading(false);
 
     } else {
@@ -291,21 +294,16 @@ const JobListingsTable = () => {
           .range(start_limit, end_limit);
 
         data.forEach(job => job.created_at = dateFormat(job.created_at))
-        setjobs(data);
-        
+        setjobs(data);   
       }
       setIsLoading(false);
     }
-
-
-    
   }
 
   const handleNextPage = (pageNo) => {
     setIsLoading(true);
     fetchPost(pageNo);
   }
-
 
   useEffect(() => {
     setIsLoading(true);
@@ -364,8 +362,8 @@ const JobListingsTable = () => {
             }}
           >
             <option value="">Status</option>
-            <option>Published</option>
-            <option>Unpublished</option>
+            <option value="Published">Published</option>
+            <option value="Unpublished">Unpublished</option>
           </select>
 
             <button
@@ -530,18 +528,14 @@ const JobListingsTable = () => {
                           </a>
                         </li>
                       }
-
                     </ul>
                   </nav>
                 }
-
-
               </tbody>
             </table>
           </div>
           }
         </div>
-      
       {/* End table widget content */}
     </div>
   );

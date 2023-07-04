@@ -6,50 +6,54 @@ import { chatSidebarToggle } from "../../../../../features/toggle/toggleSlice";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { supabase } from "../../../../../config/supabaseClient";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useSelector } from "react-redux";
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 TimeAgo.addDefaultLocale(en);
-import { BallTriangle } from 'react-loader-spinner'
+import { BallTriangle } from 'react-loader-spinner';
+
 
 const ChatBox = () => {
   const timeAgo = new TimeAgo('en-US')
 
   const dispatch = useDispatch();
-
+  const scollToRef = useRef();
   const user = useSelector(state => state.candidate.user)
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLeft, setIsLoadingLeft] = useState(false);
   const [userData, setUserData] = useState([]);
   const [chatUserName, setChatUserName] = useState(null);
   const [chatUserId, setChatUserId] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
 
-  function removeDuplicateObjects(array, property) {
-    const uniqueIds = [];
-    const unique = array.filter(element => {
-      //console.log("element", element.user_id);
-      if (element.user_id != null) {
-        const isDuplicate = uniqueIds.includes(element[property]);
-        if (!isDuplicate) {
-          uniqueIds.push(element[property]);
-          return true;
-        }
-        return false;
-      }
-    });
-    return unique;
-  }
+  // function removeDuplicateObjects(array, property) {
+  //   const uniqueIds = [];
+  //   const unique = array.filter(element => {
+  //     if (element.user_id != null) {
+  //       const isDuplicate = uniqueIds.includes(element[property]);
+  //       if (!isDuplicate) {
+  //         uniqueIds.push(element[property]);
+  //         return true;
+  //       }
+  //       return false;
+  //     }
+  //   });
+  //   return unique;
+  // }
 
   const getDistApplicants = async () => {
+
+
     // let { data, error } = await supabase.from('applications').select('user_id');
     // let res = await removeDuplicateObjects(data, 'user_id');
     // if(res){
     //     let { data2, error } = await supabase.from('users').select('user_id').contains("user_id", res);
     //     console.log("data2",data2);
     // }
+    setIsLoadingLeft(true);
     const fetchUser = await supabase
       .from('users')
       .select()
@@ -65,7 +69,7 @@ const ChatBox = () => {
           .from('messages')
           .select('*', { count: 'exact', head: true })
           .is('seen_time', null)
-          .eq('to_user_id', element.user_id);
+          .eq('from_user_id', element.user_id);
           let objData = {
             user_id: element.user_id,
             created_at: element.created_at,
@@ -80,7 +84,7 @@ const ChatBox = () => {
       }
       if(arrData){
         setUserData(arrData);
-        setIsLoading(false);
+        setIsLoadingLeft(false);
       }
     }
   }
@@ -114,14 +118,14 @@ const ChatBox = () => {
     
     document.getElementById('message_textarea').value = "";
 
-    await supabase.from('messages')
-    .update({seen_time: new Date()})
-    .eq('from_user_id', user_id)
-    .is('seen_time', null);
+    // await supabase.from('messages')
+    // .update({seen_time: new Date()})
+    // .eq('from_user_id', user_id)
+    // .is('seen_time', null);
 
     await supabase.from('messages')
     .update({seen_time: new Date()})
-    .eq('to_user_id', user_id)
+    .eq('from_user_id', user_id)
     .is('seen_time', null);
 
     // await supabase.from('messages')
@@ -150,6 +154,7 @@ const ChatBox = () => {
     if (fetchUserMessages) {
       setIsLoading(false);
       setUserMessages(fetchUserMessages.data);
+      scollToRef.current.scrollIntoView();
     }
   }
 
@@ -172,6 +177,7 @@ const ChatBox = () => {
           }
         ]).select();
       fetchUserMessages();
+      scollToRef.current.scrollIntoView();
       document.getElementById('message_textarea').value = "";
     } else {
       alert("Please enter the message");
@@ -224,11 +230,28 @@ const ChatBox = () => {
                   required=""
                 />
               </div>
+              {
+              isLoadingLeft &&
+              <div style={{ width: '20%', margin: "auto" }}>
+                <BallTriangle
+                  height={100}
+                  width={100}
+                  radius={5}
+                  color="#000"
+                  ariaLabel="ball-triangle-loading"
+                  wrapperClass={{}}
+                  wrapperStyle=""
+                  visible={true}
+                />
+              </div>
+            }
             </div>
           </div>
           {/* End cart-heaer */}
 
           <div className="card-body contacts_body">
+          {/* <button onClick={() => scollToRef.current.scrollIntoView()}>Scroll</button> */}
+      
             <ul className="contacts">
               {
                 userData && userData.map((item, index) => {
@@ -301,13 +324,13 @@ const ChatBox = () => {
             {
               userMessages.length == 0 && isLoading == false &&
               <div>
-                <div className="text-primary text-center">
+                <div className="text-secondary text-center">
                   {chatUserName != null ? "No Converation Found!!!" : "Please select user to view chat conversation !!!"}
                 </div>
               </div>
             }
             {
-              userMessages && userMessages.map((item, index) => {
+              isLoading == false && userMessages && userMessages.map((item, index) => {
                 let classNameSide = "d-flex justify-content-start";
                 let label_name = chatUserName;
                 if (item.from_user_id == user.id) {
@@ -353,6 +376,7 @@ const ChatBox = () => {
                 >
                   Send Message
                 </button>
+                <div ref={scollToRef}></div>
               </form>
             </div>
           </div>

@@ -38,7 +38,7 @@ const ProfileChart = () => {
       labels : horizontalData,
       datasets: [
         {
-          label: "Applications",
+          label: "Applied Jobs",
           data: verticalData,
           backgroundColor: "rgba(75,192,192,0.2)",
           borderColor: "rgba(75,192,192,1)",
@@ -91,7 +91,7 @@ const ProfileChart = () => {
     let { data, error } = await supabase
       .from('applications_view')
       .select("*")
-      //.eq('cust_id', user.id)
+      .eq('user_id', user.id)
       .gte('created_at', dateFormat(selectedMonth))
       .order('created_at', { ascending: false });
     if (data) {
@@ -151,10 +151,11 @@ const ProfileChart = () => {
   }
 
 
+
   return (
     <div className="tabs-box">
       <div className="widget-title">
-        <h4>Applications</h4>
+        <h4>Applied Jobs</h4>
         <div className="chosen-outer">
           {/* <!--Tabs Box--> */}
           <select

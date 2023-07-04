@@ -17,6 +17,7 @@ import JobSkills from "../../components/candidates-single-pages/shared-component
 import AboutVideo from "../../components/candidates-single-pages/shared-components/AboutVideo";
 import moment from 'moment';
 import Link from "next/link";
+import { BallTriangle } from 'react-loader-spinner';
 
 const CandidateSingleDynamicV1 = () => {
   const router = useRouter();
@@ -28,43 +29,83 @@ const CandidateSingleDynamicV1 = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState([]);
 
-  const fetchCandidateData = async(user_id) => {
+  const [educationDetails, setEducationDetails] = useState([]);
+  const [workExperienceDetails, setWorkExperienceDetails] = useState([]);
+  const [awardDetails, setAwardDetails] = useState([]);
+  const [defaultCV, setDefaultCV] = useState("");
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+
+  const fetchCandidateData = async (user_id) => {
+    setIsLoading(true);
     let { data, error } = await supabase
-        .from('cust_dtl')
-        .select()
-        .eq('cust_id', user_id);
-      if (data) {
-        let userdata = await supabase
+      .from('cust_dtl')
+      .select()
+      .eq('cust_id', user_id);
+    if (data) {
+      let userdata = await supabase
         .from('users')
         .select('name')
         .eq('user_id', user_id);
 
-        let finalData = data[0];
-        if(finalData){
-          finalData['name'] = userdata.data[0].name;
-          setUserData(finalData);
-          setIsLoading(false);
-        }
+      let finalData = data[0];
+      if (finalData) {
+        finalData['name'] = userdata.data[0].name;
+        setUserData(finalData);
+        
       }
+    }
+
+    let candidate_resume_details = await supabase
+      .from('candidate_resumes')
+      .select('*')
+      .eq('user_id', user_id)
+      .eq('deleted', 'no');
+    let arrEducation = [];
+    let arrWorkExperience = [];
+    let arrAwards = [];
+    let arrDefaultCV = [];
+    if (candidate_resume_details.data.length > 0) {
+      candidate_resume_details.data.map((item, index) => {
+        if (item.type == 'EducationDetails') {
+          arrEducation.push(item);
+        } else if (item.type == 'WorkDetails') {
+          arrWorkExperience.push(item);
+        } else if (item.type == 'CV Uploaded') {
+          if(item.sub_title == "defaultcv"){
+            arrDefaultCV.push(item);
+          }
+        } else if (item.type == 'Award') {
+          arrAwards.push(item);
+        }
+      });
+    }
+    if (arrEducation.length > 0) {
+      setEducationDetails(arrEducation);
+      setWorkExperienceDetails(arrWorkExperience);
+      setAwardDetails(arrAwards);
+      setDefaultCV(arrDefaultCV);
+    }
+    setIsLoading(false);
   }
+
 
   const ValidateURL = (str) => {
     var regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
     if (!regex.test(str)) {
-      return "https://"+str;
+      return "https://" + str;
     } else {
       return str;
     }
   }
-  
+
   useEffect(() => {
-    
+
     fetchCandidateData(id);
 
     if (!id) <h1>Loading...</h1>;
     else setCandidates(candidates.find((item) => item.id == id));
 
-    return () => {};
+    return () => { };
   }, [id]);
 
   return (
@@ -91,7 +132,7 @@ const CandidateSingleDynamicV1 = () => {
               <div className="inner-box">
                 <div className="content">
                   <figure className="image">
-                  <img src="/images/resource/candidate-1.png" alt="resource" />
+                    <img src="/images/resource/candidate-1.png" alt="resource" />
                   </figure>
                   <h4 className="name">{userData?.name}</h4>
 
@@ -119,22 +160,25 @@ const CandidateSingleDynamicV1 = () => {
                 </div>
 
                 <div className="btn-box">
-                  <Link
-                    className="theme-btn btn-style-one pr-2"
-                    href="/images/sample.pdf"
-                    download
-                    style={{marginRight:10}}
-                  >
-                    Download CV
-                  </Link>
-                  <Link
+                  {
+                    defaultCV.length > 0 &&
+                    <a
+                      className="theme-btn btn-style-one pr-2"
+                      target="_blank"
+                      href={cloudPath+defaultCV[0].attachemnt}
+                      download
+                      style={{ marginRight: 10 }}
+                    >
+                      Download CV
+                    </a>
+                  }
+                  
+                  {/* <Link
                     className="btn-style-one"
                     href="/employers-dashboard/shortlisted-resumes"
                   >Back
-                  </Link>
-                  {/* <button className="bookmark-btn">
-                    <i className="flaticon-bookmark"></i>
-                  </button> */}
+                  </Link> */}
+                  <button className="btn-style-one" onClick={() => router.back()}>Back</button>
                 </div>
               </div>
             </div>
@@ -151,42 +195,120 @@ const CandidateSingleDynamicV1 = () => {
                   <div className="video-outer">
                     <h4>About {userData.name}</h4>
                   </div>
-                  {/* <!-- About Video Box --> */}
                   <p>
-                  {userData.description}
+                    {userData.description}
                   </p>
-
-                  {/* {candidateResume.map((resume) => (
-                    <div
-                      className={`resume-outer ${resume.themeColor}`}
-                      key={resume.id}
-                    >
+                  {
+                    isLoading &&
+                    <div style={{ width: '20%', margin: "auto" }}>
+                      <BallTriangle
+                        height={100}
+                        width={100}
+                        radius={5}
+                        color="#000"
+                        ariaLabel="ball-triangle-loading"
+                        wrapperClass={{}}
+                        wrapperStyle=""
+                        visible={true}
+                      />
+                    </div>
+                  }
+                  {
+                    educationDetails.length > 0 && <div>
                       <div className="upper-title">
-                        <h4>{resume?.title}</h4>
+                        <h4>Education</h4>
                       </div>
-
-                      {resume?.blockList?.map((item) => (
-                        <div className="resume-block" key={item.id}>
-                          <div className="inner">
-                            <span className="name">{item.meta}</span>
-                            <div className="title-box">
-                              <div className="info-box">
-                                <h3>{item.name}</h3>
-                                <span>{item.industry}</span>
+                      {educationDetails.map((resume) => (
+                        <div
+                          className={`resume-outer`}
+                          key={resume.id}
+                        >
+                          <div className="resume-block" key={resume.id}>
+                            <div className="inner">
+                              <span className="name">E</span>
+                              <div className="title-box">
+                                <div className="info-box">
+                                  <h3>{resume.title}</h3>
+                                  <span>{resume.sub_title}</span>
+                                </div>
+                                <div className="edit-box">
+                                  <span className="year">{moment(resume.from_date).format("YYYY")} - {moment(resume.to_date).format("YYYY")}</span>
+                                </div>
                               </div>
-                              <div className="edit-box">
-                                <span className="year">{item.year}</span>
-                              </div>
+                              <div className="text">{resume.description}</div>
                             </div>
-                            <div className="text">{item.text}</div>
                           </div>
                         </div>
                       ))}
                     </div>
-                  ))} */}
+                  }
+
+
+                  {
+                    workExperienceDetails.length > 0 && <div>
+                      <div className="upper-title">
+                        <h4>Work Experience</h4>
+                      </div>
+                      {workExperienceDetails.map((resume) => (
+                        <div
+                          className={`resume-outer theme-blue`}
+                          key={resume.id}
+                        >
+                          <div className="resume-block" key={resume.id}>
+                            <div className="inner">
+                              <span className="name">E</span>
+                              <div className="title-box">
+                                <div className="info-box">
+                                  <h3>{resume.title}</h3>
+                                  <span>{resume.sub_title}</span>
+                                </div>
+                                <div className="edit-box">
+                                  <span className="year">{moment(resume.from_date).format("YYYY")} - {moment(resume.to_date).format("YYYY")}</span>
+                                </div>
+                              </div>
+                              <div className="text">{resume.description}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  }
+
+
+
+                  {
+                    awardDetails.length > 0 && <div>
+                      <div className="upper-title">
+                        <h4>Awards</h4>
+                      </div>
+                      {awardDetails.map((resume) => (
+                        <div
+                          className={`resume-outer theme-yellow`}
+                          key={resume.id}
+                        >
+                          <div className="resume-block" key={resume.id}>
+                            <div className="inner">
+                              <span className="name">E</span>
+                              <div className="title-box">
+                                <div className="info-box">
+                                  <h3>{resume.title}</h3>
+                                  <span>{resume.sub_title}</span>
+                                </div>
+                                <div className="edit-box">
+                                  <span className="year">{moment(resume.from_date).format("YYYY")} - {moment(resume.to_date).format("YYYY")}</span>
+                                </div>
+                              </div>
+                              <div className="text">{resume.description}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  }
+
                 </div>
               </div>
-              
+
               <div className="sidebar-column col-lg-4 col-md-12 col-sm-12">
                 <aside className="sidebar">
                   <div className="sidebar-widget">
@@ -242,7 +364,7 @@ const CandidateSingleDynamicV1 = () => {
                     <h4 className="widget-title">Social media</h4>
                     <div className="widget-content">
                       <div className="social-links">
-                        <Social 
+                        <Social
                           fb={ValidateURL(userData.facebook_url)}
                           tw={ValidateURL(userData.twitter_url)}
                           li={ValidateURL(userData.linkedin_url)}

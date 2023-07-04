@@ -86,6 +86,7 @@ const JobListingsTable = () => {
   useEffect(() => {
     setIsLoading(true);
     fetchApplications(currentPage);
+    console.log("applications",applications);
   }, []);
 
   const handleNextPage = (pageNo) => {
@@ -167,7 +168,7 @@ const JobListingsTable = () => {
       </div>
 
       {/* Start table widget content */}
-      {isLoading == false && applications.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500' }}><center>You have not applied to any jobs yet!</center></p> :
+      {isLoading == false && applications.length == 0 ? <p style={{ fontSize: '1rem', paddingBottom:40, fontWeight: '500' }}><center>You have not applied to any jobs yet!</center></p> :
         <div className="widget-content">
           <div className="table-outer">
             <div className="table-outer">

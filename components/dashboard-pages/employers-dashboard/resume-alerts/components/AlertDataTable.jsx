@@ -39,7 +39,7 @@ const AlertDataTable = () => {
         .from('notification')
         .select()
         .like('notification_text', '%' + newKeyword + '%')
-        .eq('user_id', user.id)
+        //.eq('user_id', user.id)
         .is('deleted', null)
         //.not('status',"eq",'Qualified');
         .order('created_at', { ascending: false })
@@ -54,7 +54,7 @@ const AlertDataTable = () => {
       let countTotalRecords = await supabase
         .from('notification')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+        //.eq('user_id', user.id)
         .is('deleted', null);
       let totalRecords = countTotalRecords.count;
       
@@ -80,7 +80,7 @@ const AlertDataTable = () => {
         let { data, error } = await supabase
           .from('notification')
           .select()
-          .eq('user_id', user.id)
+          //.eq('user_id', user.id)
           //.not('status',"eq",'Qualified');
           .is('deleted', null)
           .order('created_at', { ascending: false })

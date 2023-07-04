@@ -11,6 +11,7 @@ import { BallTriangle } from 'react-loader-spinner'
 
 const WidgetContentBox = () => {
     const user = useSelector(state => state.candidate.user);
+    console.log("user",user);
     const [fetchedAllApplicants, setFetchedAllApplicantsData] = useState({});
     const [searchField, setSearchField] = useState('');
     const [jobStatus, setJobStatus] = useState('');
@@ -83,7 +84,7 @@ const WidgetContentBox = () => {
             setIsLoading(true);
             let countTotalRecords = await supabase
                 .from('applications_view')
-                .select('*', { count: 'exact', head: true })
+                .select('*', { count: 'exact', head: true });
                 //.eq('cust_id', user.id);
             let totalRecords = countTotalRecords.count;
             
@@ -149,11 +150,33 @@ const WidgetContentBox = () => {
     }
 
 
-    const ViewCV = async (applicationId) => {
+    const ViewCV = async (applicant) => {
+        let dataCheck = await supabase
+        .from('notification')
+        .select('*')
+        .eq('application_id', applicant.application_id)
+        .eq('cust_id', applicant.cust_id)
+        .eq('user_id', applicant.user_id)
+        .eq('type', 'Viewed CV');
+        if(dataCheck.data.length == 0){
+            await supabase
+            .from('notification')
+            .insert([{
+                    type: `Viewed CV`,
+                    cust_id: user.id,
+                    job_id: applicant.job_id,
+                    user_id: applicant.cust_id,
+                    application_id: applicant.application_id,
+                    notification_text: `${user.name} Viewed ${applicant.name} CV for job <b>${applicant.job_title}</b>`,
+                    created_at: dateFormat(new Date())
+                }
+            ]);
+        }
+
         const { data, error } = await supabase
             .from('applications_view')
             .select('*')
-            .eq('application_id', applicationId);
+            .eq('application_id', applicant.application_id);
 
         if (data) {
             window.open(data[0].doc_dwnld_url.slice(14, -2), '_blank', 'noreferrer');
@@ -499,7 +522,7 @@ const WidgetContentBox = () => {
                                         <td>
                                             <div className="option-box">
                                                 <ul className="option-list">
-                                                    <li onClick={() => { ViewCV(applicant.application_id) }}>
+                                                    <li onClick={() => { ViewCV(applicant) }}>
                                                         <button data-text="View/Download CV">
                                                             <span className="la la-file-download"></span>
                                                         </button>

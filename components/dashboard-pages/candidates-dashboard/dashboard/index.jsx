@@ -6,11 +6,14 @@ import TopCardBlock from "./components/TopCardBlock";
 import ProfileChart from "./components/ProfileChart";
 import Notification from "./components/Notification";
 import CopyrightFooter from "../../CopyrightFooter";
+import { useSelector } from "react-redux";
 import JobApplied from "./components/JobApplied";
 import DashboardCandidatesHeader from "../../../header/DashboardCandidatesHeader";
 import MenuToggler from "../../MenuToggler";
 
 const Index = () => {
+  const user = useSelector(state => state.candidate.user);
+  let userName = "Howdy, "+user.name+" !";
   return (
     <div className="page-wrapper dashboard">
       <span className="header-span"></span>
@@ -31,7 +34,7 @@ const Index = () => {
       {/* <!-- Dashboard --> */}
       <section className="user-dashboard">
         <div className="dashboard-outer">
-          <BreadCrumb title="Howdy, Jerome!!" />
+          <BreadCrumb title={userName} />
           {/* breadCrumb */}
 
           <MenuToggler />

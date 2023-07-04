@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { chatSidebarToggle } from '../../../../features/toggle/toggleSlice';
@@ -23,16 +23,18 @@ const Index = () => {
   const { chatSidebar } = useSelector((state) => state.toggle);
   const timeAgo = new TimeAgo('en-US');
   const dispatch = useDispatch();
+  const scollToRef = useRef();
   const user = useSelector(state => state.candidate.user)
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLeft, setIsLoadingLeft] = useState(false);
   const [userData, setUserData] = useState([]);
   const [chatUserName, setChatUserName] = useState(null);
   const [chatUserId, setChatUserId] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
 
   const getDistApplicants = async () => {
-    setIsLoading(true);
+    setIsLoadingLeft(true);
     const fetchUser = await supabase
       .from('users')
       .select()
@@ -48,7 +50,7 @@ const Index = () => {
           .from('messages')
           .select('*', { count: 'exact', head: true })
           .is('seen_time', null)
-          .eq('to_user_id', element.user_id);
+          .eq('from_user_id', element.user_id);
           let objData = {
             user_id: element.user_id,
             created_at: element.created_at,
@@ -63,7 +65,7 @@ const Index = () => {
       }
       if(arrData){
         setUserData(arrData);
-        setIsLoading(false);
+        setIsLoadingLeft(false);
       }
     }
   }
@@ -97,14 +99,14 @@ const Index = () => {
 
     document.getElementById('message_textarea').value = "";
     
-    await supabase.from('messages')
-    .update({seen_time: new Date()})
-    .eq('from_user_id', user_id)
-    .is('seen_time', null);
+    // await supabase.from('messages')
+    // .update({seen_time: new Date()})
+    // .eq('from_user_id', user_id)
+    // .is('seen_time', null);
 
     await supabase.from('messages')
     .update({seen_time: new Date()})
-    .eq('to_user_id', user_id)
+    .eq('from_user_id', user_id)
     .is('seen_time', null);
 
     // await supabase.from('messages')
@@ -133,6 +135,7 @@ const Index = () => {
     if (fetchUserMessages) {
       setIsLoading(false);
       setUserMessages(fetchUserMessages.data);
+      scollToRef.current.scrollIntoView();
     }
   }
 
@@ -155,6 +158,7 @@ const Index = () => {
           }
         ]).select();
       fetchUserMessages();
+      scollToRef.current.scrollIntoView();
       document.getElementById('message_textarea').value = "";
     } else {
       alert("Please enter the message");
@@ -232,11 +236,27 @@ const Index = () => {
                   required=""
                 />
               </div>
+              
             </div>
           </div>
           {/* End cart-heaer */}
 
           <div className="card-body contacts_body">
+          {
+              isLoadingLeft &&
+              <div style={{ width: '20%', margin: "auto" }}>
+                <BallTriangle
+                  height={100}
+                  width={100}
+                  radius={5}
+                  color="#000"
+                  ariaLabel="ball-triangle-loading"
+                  wrapperClass={{}}
+                  wrapperStyle=""
+                  visible={true}
+                />
+              </div>
+            }
             <ul className="contacts">
               {
                 userData && userData.map((item, index) => {
@@ -309,7 +329,7 @@ const Index = () => {
             {
               userMessages.length == 0 && isLoading == false &&
               <div>
-                <div className="text-primary text-center">
+                <div className="text-secondary text-center">
                   {chatUserName != null ? "No Converation Found!!!" : "Please select user to view chat conversation !!!"}
                 </div>
               </div>
@@ -361,6 +381,7 @@ const Index = () => {
                 >
                   Send Message
                 </button>
+                <div ref={scollToRef}></div>
               </form>
             </div>
           </div>
@@ -374,7 +395,7 @@ const Index = () => {
       </section>
       {/* <!-- End Dashboard --> */}
 
-      <CopyrightFooter />
+      {/* <CopyrightFooter /> */}
       {/* <!-- End Copyright --> */}
     </div>
     // End page-wrapper

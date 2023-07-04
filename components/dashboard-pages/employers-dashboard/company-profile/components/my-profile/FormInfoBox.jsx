@@ -77,10 +77,9 @@ const FormInfoBox = () => {
                     setCompanyAboutForm(customer[0].description);
                     setCompanyTotalBets(customer[0].nbr_of_beds);
 
-                    let all_departments = customer[0].departments;
-                    //console.log("all_departments",all_departments);
                     let arrSelectedDepartments = [];
-                    if(all_departments != ""){
+                    if(customer[0].departments != null){
+                        let all_departments = customer[0].departments;
                         all_departments = all_departments.split(",");
                         all_departments.map((item) => {
                             catOptions.map((defined_item,index) => {
@@ -97,8 +96,8 @@ const FormInfoBox = () => {
                 }
             }
         } catch (e) {
-            console.o
-            toast.error('System is unavailable.  Please try again later or contact tech support!', {
+            console.log(e);
+            toast.error('2.System is unavailable.  Please try again later or contact tech support!', {
                 position: "bottom-right",
                 autoClose: true,
                 hideProgressBar: false,
@@ -179,7 +178,7 @@ const FormInfoBox = () => {
             } catch (err) {
                 // open toast
                 console.log("Error", err);
-                toast.error('Error while saving your company profile, Please try again later or contact tech support', {
+                toast.error('1.Error while saving your company profile, Please try again later or contact tech support', {
                     position: "bottom-right",
                     autoClose: true,
                     hideProgressBar: false,

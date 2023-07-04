@@ -25,7 +25,7 @@ const TopCardBlock = () => {
     let countTotalPostedJobs = await supabase
       .from('jobs')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      //.eq('user_id', user.id)
       .eq('status', 'Published');
     if (countTotalPostedJobs.count > 0) {
       setTotalPostedJobs(countTotalPostedJobs.count);
@@ -34,9 +34,9 @@ const TopCardBlock = () => {
     let countTotalApplications = await supabase
       .from('applications')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      //.eq('user_id', user.id)
       .is('deleted', null);
-    console.log("countTotalApplications", countTotalApplications);
+    //console.log("countTotalApplications", countTotalApplications);
     if (countTotalApplications.count > 0) {
       setTotalApplications(countTotalApplications.count);
     }
@@ -81,7 +81,7 @@ const TopCardBlock = () => {
     let countTotalShortlist = await supabase
       .from('applications')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      //.eq('user_id', user.id)
       .is('deleted', null);
     if (countTotalShortlist.count > 0) {
       setTotalShortlist(countTotalShortlist.count);

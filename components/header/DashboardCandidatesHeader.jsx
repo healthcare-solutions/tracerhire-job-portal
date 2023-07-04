@@ -54,15 +54,14 @@ const DashboardCandidatesHeader = () => {
           {/* End .nav-outer */}
 
           <div className="outer-box">
-            <button className="menu-btn">
+            {/* <button className="menu-btn">
               <span className="count">1</span>
               <span className="icon la la-heart-o"></span>
-            </button>
-            {/* wishlisted menu */}
-
-            <button className="menu-btn">
+            </button> */}
+            
+            {/* <button className="menu-btn">
               <span className="icon la la-bell"></span>
-            </button>
+            </button> */}
             {/* End notification-icon */}
 
             {/* <!-- Dashboard Option --> */}

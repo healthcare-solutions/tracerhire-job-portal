@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { BallTriangle } from 'react-loader-spinner'
+import { BallTriangle } from 'react-loader-spinner';
 
 const Applicants = () => {
 
@@ -40,26 +40,42 @@ const Applicants = () => {
     setIsLoading(true);
     if (newKeyword != null) {
       let { data, error } = await supabase
-        .from('applications')
+        .from('applications_view')
         .select()
-        .eq('cust_id', user.id)
+        //.eq('cust_id', user.id)
         .like('name', '%' + newKeyword + '%')
         //.not('status',"eq",'Qualified');
         .order('created_at', { ascending: false })
         .limit(100);
       if (data) {
-        setUserData(data);
+        // Make Record Unique Start //
+        const unique = data.filter(
+          (obj, index) =>
+            data.findIndex((item) => item.user_id === obj.user_id) === index
+        );
+        // Make Record Unique Over //
+
+        setUserData(unique);
+        //setUserData(data);
         setIsLoading(false);
       }
     } else {
       let countTotalRecords = await supabase
-        .from('applications')
-        .select('*', { count: 'exact', head: true }).eq('cust_id', user.id);
+        .from('applications_view')
+        .select('*', { count: 'exact', head: true });
+        //.eq('cust_id', user.id);
 
       // Fetching All Records && Make Record Unique Start //
+
+      // let fetchAllRecordsbkp = await supabase
+      //   .from('applications_view')
+      //   .select(`application_id,user_id,email,name,cust_id,user_id,candidate_message,cust_dtl:cust_id(cust_id,profile_logo)`).eq('cust_id', user.id);
+      //   console.log("fetchAllRecordsbkp",fetchAllRecordsbkp);
+
       let fetchAllRecords = await supabase
-        .from('applications')
-        .select().eq('cust_id', user.id);
+        .from('applications_view')
+        .select();
+        //.eq('cust_id', user.id);
       let allData = fetchAllRecords.data;
       const uniqueRecords = allData.filter(
         (obj, index) =>
@@ -86,8 +102,9 @@ const Applicants = () => {
         //console.log("start_limit", start_limit, "end_limit", end_limit);
         setCurrentPage(pageNo);
         let { data, error } = await supabase
-          .from('applications')
-          .select().eq('cust_id', user.id)
+          .from('applications_view')
+          .select()
+          //.eq('cust_id', user.id)
           //.not('status',"eq",'Qualified');
           .order('created_at', { ascending: false })
           .range(start_limit, end_limit);
@@ -221,26 +238,15 @@ const Applicants = () => {
 
   return (
     <>
-      {
-        isLoading &&
-        <div style={{ width: '20%', margin: "auto" }}>
-          <BallTriangle
-            height={100}
-            width={100}
-            radius={5}
-            color="#000"
-            ariaLabel="ball-triangle-loading"
-            wrapperClass={{}}
-            wrapperStyle=""
-            visible={true}
-          />
-        </div>
-      }
+      
       <div className="chosen-outer">
         {/* <!--search box--> */}
+        
         <div className="search-box-one">
+        <h4 style={{float:'left'}}>Candidates</h4>
           <form method="post" action="blog.html">
             <div className="form-group pull-right mb-3">
+            
               <span className="icon flaticon-search-1"></span>
               <input
                 type="search"
@@ -252,6 +258,21 @@ const Applicants = () => {
             </div>
           </form>
           <br />
+          {
+        isLoading &&
+          <div style={{ width: '20%', margin: "auto" }}>
+            <BallTriangle
+              height={100}
+              width={100}
+              radius={5}
+              color="#000"
+              ariaLabel="ball-triangle-loading"
+              wrapperClass={{}}
+              wrapperStyle=""
+              visible={true}
+            />
+          </div>
+        }
         </div>
         {/* End searchBox one */}
 
