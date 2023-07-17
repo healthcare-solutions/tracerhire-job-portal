@@ -4,6 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { supabase } from "../../../../../config/supabaseClient";
 import { useSelector } from "react-redux";
 import moment from 'moment';
+import { BallTriangle } from 'react-loader-spinner'
 
 // validation chaching
 function checkFileTypes(files) {
@@ -21,6 +22,7 @@ function checkFileTypes(files) {
 }
 
 const CvUploader = () => {
+    const [isLoading, setIsLoading] = useState(false);
     const [getManager, setManager] = useState([]);
     const [getError, setError] = useState("");
     const [userCV, setUserCV] = useState([]);
@@ -47,16 +49,18 @@ const CvUploader = () => {
     };
 
     const getUserCV = async () => {
+        setIsLoading(true);
         let { data, error } = await supabase
             .from('candidate_resumes')
             .select("*")
-            .eq('type','CV Uploaded')
-            .eq('deleted','no')
+            .eq('type', 'CV Uploaded')
+            .eq('deleted', 'no')
             .eq('user_id', user.id)
-            .order('id', {ascending: false});
+            .order('id', { ascending: false });
         if (data) {
             setTotalCV(data.length);
             setUserCV(data);
+            setIsLoading(false);
         }
     }
 
@@ -69,22 +73,22 @@ const CvUploader = () => {
 
     const handleSetDefaultCV = async () => {
         const fetchCV = await supabase
-        .from('candidate_resumes')
-        .select()
-        .eq('user_id', user.id)
-        .eq('type', 'CV Uploaded')
-        .eq('deleted', 'no')
-        .order('id', {ascending: false});
-        if(fetchCV.data[0] && fetchCV.data[0] !== undefined){
-            let updateDefaultCVToNull = await supabase
             .from('candidate_resumes')
-            .update({ sub_title: "" })
-            .eq('user_id', user.id);
-            if(updateDefaultCVToNull){
-                await supabase
+            .select()
+            .eq('user_id', user.id)
+            .eq('type', 'CV Uploaded')
+            .eq('deleted', 'no')
+            .order('id', { ascending: false });
+        if (fetchCV.data[0] && fetchCV.data[0] !== undefined) {
+            let updateDefaultCVToNull = await supabase
                 .from('candidate_resumes')
-                .update({ sub_title: 'defaultcv' })
-                .eq('id', fetchCV.data[0].id);
+                .update({ sub_title: "" })
+                .eq('user_id', user.id);
+            if (updateDefaultCVToNull) {
+                await supabase
+                    .from('candidate_resumes')
+                    .update({ sub_title: 'defaultcv' })
+                    .eq('id', fetchCV.data[0].id);
             }
         }
     }
@@ -164,7 +168,7 @@ const CvUploader = () => {
                     ]);
 
                 if (insertNotification) {
-                    
+
                     setTimeout(() => {
                         //location.reload();
                         getUserCV();
@@ -180,7 +184,7 @@ const CvUploader = () => {
                         theme: "colored",
                     });
                 }
-            }handleSetDefaultCV();
+            } handleSetDefaultCV();
         }
         else {
             toast.error('Please upload your CV before Apply.', {
@@ -198,17 +202,33 @@ const CvUploader = () => {
 
     // delete image
     const deleteHandler = async (id) => {
-        //const deleted = getManager?.filter((file) => file.name !== name);
-        //setManager(deleted);
-        await supabase.from('candidate_resumes').update({deleted: 'yes'}).eq('id', id);
-        handleSetDefaultCV();
-        setTimeout(() => {
-            getUserCV();
-        }, 2000);
+        if (confirm("Are you sure want to delete this CV?")) {
+            setIsLoading(true);
+            //const deleted = getManager?.filter((file) => file.name !== name);
+            //setManager(deleted);
+            await supabase.from('candidate_resumes').update({ deleted: 'yes' }).eq('id', id);
+            toast.success('CV Successfully Deleted!', {
+                position: "bottom-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+            handleSetDefaultCV();
+            setTimeout(() => {
+                getUserCV();
+            }, 2000);
+        } else {
+            return false;
+        }
+
     };
 
     const viewHandler = async (filename) => {
-        window.open(cloudPath+filename, '_blank', 'noreferrer');
+        window.open(cloudPath + filename, '_blank', 'noreferrer');
     }
 
     return (
@@ -245,8 +265,22 @@ const CvUploader = () => {
 
             {/* Start resume Preview  */}
             <div className="files-outer">
-
-                {userCV?.map((file, i) => (
+                {
+                    isLoading &&
+                    <div style={{ width: '20%', margin: "auto" }}>
+                        <BallTriangle
+                            height={100}
+                            width={100}
+                            radius={5}
+                            color="#000"
+                            ariaLabel="ball-triangle-loading"
+                            wrapperClass={{}}
+                            wrapperStyle=""
+                            visible={true}
+                        />
+                    </div>
+                }
+                {isLoading == false && userCV?.map((file, i) => (
                     <div key={i} className="file-edit-box">
                         <span className="title">{file.title}</span>
                         <span className="title">{file.sub_title}</span>
@@ -256,10 +290,10 @@ const CvUploader = () => {
                             </button>
                             {
                                 totalCV > 1 && <button onClick={() => deleteHandler(file.id)}>
-                                <span className="la la-trash"></span>
-                            </button>
+                                    <span className="la la-trash"></span>
+                                </button>
                             }
-                            
+
                         </div>
                     </div>
                 ))}

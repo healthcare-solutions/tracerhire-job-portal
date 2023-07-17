@@ -11,13 +11,14 @@ const Experiences = () => {
   const user = useSelector(state => state.candidate.user);
   const [educationData, setEducationData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
     fetchCandidateResume();
   }, []);
 
   const handleDeleteRow = async (id) => {
-    if (confirm("Are you sure you wanna delete?")) {
+    if (confirm("Are you sure want to delete this Experience?")) {
       await supabase
         .from('candidate_resumes')
         .update({ deleted: 'yes' })
@@ -58,7 +59,17 @@ const Experiences = () => {
     <div className="resume-outer theme-blue">
       <div className="upper-title">
         <h4>Work Experience</h4>
-        <AddExperience type="WorkDetails" title="Designation" subtitle="Company" description="Work Details" title_value="" subtitle_value="" description_value="" />
+        <AddExperience 
+        type="WorkDetails" 
+        title="Designation" 
+        subtitle="Company" 
+        description="Work Details" 
+        title_value="" 
+        subtitle_value="" 
+        description_value="" 
+        from_date_value="" 
+        to_date_value="" 
+        />
         <button className="add-info-btn" data-bs-toggle="modal" data-bs-target="#loginPopupModalExp">
           <span className="icon flaticon-plus"></span> Add Work Experience
         </button>

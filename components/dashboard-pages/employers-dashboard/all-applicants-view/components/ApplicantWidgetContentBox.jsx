@@ -238,7 +238,7 @@ const ApplicantWidgetContentBox = () => {
                                 <img src={item.logo} alt="logo" />
                                 </span> */}
                                 <h4>
-                                <Link href={`/candidates-single-v1/${applicant.user_id}`}>
+                                <Link href={`/candidate-details/${applicant.user_id}`}>
                                     {applicant.name}
                                 </Link>
                                 </h4>

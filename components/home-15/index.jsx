@@ -112,51 +112,45 @@ const index = () => {
       </section> */}
       {/* <!-- End Top Companies --> */}
 
-      {/* <section className="layout-pt-60 layout-pb-60">
+      <section className="layout-pt-60 layout-pb-60">
         <div className="auto-container">
           <div className="sec-title-outer">
             <div className="sec-title">
               <h2>Featured Cities</h2>
-              <div className="text">
-                Lorem ipsum dolor sit amet elit, sed do eiusmod tempor
-              </div>
-            </div> */}
+            </div>
       {/* End sec-title */}
       {/* <Link href="/job-list" className="link text-green">
               Browse All Locations <span className="fa fa-angle-right"></span>
-            </Link>
-          </div> */}
+            </Link> */}
+          </div>
       {/* End .sec-title-outer */}
 
-      {/* <div className="row" data-aos="fade-up">
+      <div className="row" data-aos="fade-up">
             <FeaturedBlock3 />
-          </div> */}
+          </div>
       {/* End .row */}
-      {/* </div> */}
+      </div>
       {/* End auto-container */}
-      {/* </section> */}
+      </section>
       {/* <!-- End Features Section --> */}
-      {/* 
+      
       <section className="layout-pt-60 layout-pb-120">
         <div className="auto-container">
           <div className="row justify-content-center text-center">
             <div className="col-auto">
-              <div className="">
+              {/* <div className="">
                 <h2 className="fw-700">What people are saying</h2>
-                <div className="text mt-9">
-                  Consectetur adipisicing elit, sed do eiusmod temp
-                </div>
-              </div>
+              </div> */}
             </div>
-          </div> */}
+          </div>
       {/* End .row */}
-      {/* 
+      
           <div className="job-carousel pt-50" data-aos="fade-up">
             <Testimonial6 />
-          </div> */}
+          </div>
       {/* End .job-carousel pt-50 */}
-      {/* </div>
-      </section> */}
+      </div>
+      </section>
       {/* <!-- End Testimonials Section --> */}
 
       {/* <Subscribe2 /> */}

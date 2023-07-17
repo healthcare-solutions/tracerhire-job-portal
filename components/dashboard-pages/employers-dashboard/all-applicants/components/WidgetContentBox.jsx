@@ -36,12 +36,12 @@ const WidgetContentBox = () => {
     async function findApplicant() {
         setIsLoading(true);
         console.log("jobStatus",jobStatus);
-        if (searchField != '' && jobStatus != null) {
+        if (searchField != '' && jobStatus != "") {
             console.log("if 1");
             let { data, error } = await supabase
                 .from('applications_view')
                 .select("*")
-                .like('name', '%' + searchField + '%')
+                .ilike('name', '%' + searchField + '%')
                 //.eq('cust_id', user.id)
                 .eq('status', jobStatus)
                 .order('created_at', { ascending: false });
@@ -55,7 +55,7 @@ const WidgetContentBox = () => {
             let { data, error } = await supabase
                 .from('applications_view')
                 .select("*")
-                .like('name', '%' + searchField + '%')
+                .ilike('name', '%' + searchField + '%')
                 //.eq('cust_id', user.id)
                 .order('created_at', { ascending: false });
             if (data) {
@@ -495,9 +495,12 @@ const WidgetContentBox = () => {
                                                         {/* <Link href={`/employers-dashboard/edit-job/${applicant.user_id}`}>
                                                 {applicant.name}
                                             </Link> */}
-                                            <Link href={`/candidates-single-v1/${applicant.user_id}`}>
-                                            {applicant.name}
-                                            </Link>
+                                            {
+                                                applicant.user_id == null ? applicant.name + " (Guest)" : <Link href={`/candidate-details/${applicant.user_id}`}>
+                                                {applicant.name}
+                                                </Link>
+                                            }
+                                            
                                                         
                                                     </h4>
                                                 </div>

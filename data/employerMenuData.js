@@ -63,6 +63,13 @@ module.exports = [
       routePath: "/employers-dashboard/shortlisted-resumes",
       active: "",
     },
+    {
+      id: 7,
+      name: "Feedback",
+      icon: "la-user-tie",
+      routePath: "/employers-dashboard/feedback",
+      active: "",
+    },
     // {
     //   id: 10,
     //   name: "Change Password",

@@ -6,7 +6,7 @@ import { chatSidebarToggle } from "../../../../../features/toggle/toggleSlice";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { supabase } from "../../../../../config/supabaseClient";
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useSelector } from "react-redux";
 import TimeAgo from 'javascript-time-ago';
@@ -20,6 +20,11 @@ const ChatBox = () => {
 
   const dispatch = useDispatch();
   const scollToRef = useRef();
+  const inputRef = useRef(null);
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+  const [scrollHeight, setScrollHeight] = useState(0);
+  const refScrollHeight = useRef(null);
+  const [scrollBottom, setScrollBottom] = useState(0);
   const user = useSelector(state => state.candidate.user)
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +33,6 @@ const ChatBox = () => {
   const [chatUserName, setChatUserName] = useState(null);
   const [chatUserId, setChatUserId] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
-
   // function removeDuplicateObjects(array, property) {
   //   const uniqueIds = [];
   //   const unique = array.filter(element => {
@@ -44,8 +48,8 @@ const ChatBox = () => {
   //   return unique;
   // }
 
-  const getDistApplicants = async () => {
-
+  const getDistApplicants = async (showLoading) => {
+    //await supabase.from('messages').update({seen_time: null});
 
     // let { data, error } = await supabase.from('applications').select('user_id');
     // let res = await removeDuplicateObjects(data, 'user_id');
@@ -53,7 +57,10 @@ const ChatBox = () => {
     //     let { data2, error } = await supabase.from('users').select('user_id').contains("user_id", res);
     //     console.log("data2",data2);
     // }
-    setIsLoadingLeft(true);
+    if (showLoading) {
+      setIsLoadingLeft(true);
+    }
+
     const fetchUser = await supabase
       .from('users')
       .select()
@@ -63,26 +70,42 @@ const ChatBox = () => {
     if (fetchUser) {
       let allUserData = fetchUser.data;
       let arrData = [];
-      if(allUserData){
+      if (allUserData) {
         for (const element of allUserData) {
+          // const fetchOneDataUser = await supabase
+          // .from('messages')
+          // .select('from_user_id','to_user_id')
+          // .is('seen_time', null)
+          // .eq('from_user_id', element.user_id);
+          // console.log("fetchOneDataUser",fetchOneDataUser);
+          //console.log("element",element);
+          let photo_url = '/images/resource/candidate-1.png';
+          if (element.user_photo != null) {
+            photo_url = cloudPath + element.user_photo;
+          } else if (element.photo_url != null) {
+            photo_url = element.photo_url;
+          }
+          //console.log("photo_url",photo_url);
           const fetchOneData = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .is('seen_time', null)
-          .eq('from_user_id', element.user_id);
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .is('seen_time', null)
+            .eq('from_user_id', element.user_id);
           let objData = {
             user_id: element.user_id,
             created_at: element.created_at,
             email: element.email,
             name: element.name,
             phone_number: element.phone_number,
-            photo_url: element.photo_url,
-            count : fetchOneData.count
+            photo_url: photo_url,
+            count: fetchOneData.count
           }
+          //console.log("objData",objData);
+          //console.log("from_user_id",element.user_id,"Count",fetchOneData.count);
           arrData.push(objData);
         }
       }
-      if(arrData){
+      if (arrData) {
         setUserData(arrData);
         setIsLoadingLeft(false);
       }
@@ -90,7 +113,7 @@ const ChatBox = () => {
   }
 
   useEffect(() => {
-    getDistApplicants();
+    getDistApplicants(true);
   }, []);
 
   const chatToggle = () => {
@@ -98,6 +121,7 @@ const ChatBox = () => {
   };
 
   const fetchUserMessages = async () => {
+    console.log("Fetch User Message Called");
     setUserMessages([]);
     setIsLoading(true);
     const fetchUserMessages = await supabase
@@ -108,15 +132,19 @@ const ChatBox = () => {
       .limit(100);
     if (fetchUserMessages) {
       setUserMessages(fetchUserMessages.data);
+      inputRef.current.focus();
+
       setIsLoading(false);
     }
   }
 
   const handleChatUser = async (user_id) => {
+    console.log("Handle Chat User");
     setIsLoading(true);
     setUserMessages([]);
-    
+
     document.getElementById('message_textarea').value = "";
+    document.getElementById('searchbar').value = "";
 
     // await supabase.from('messages')
     // .update({seen_time: new Date()})
@@ -124,9 +152,9 @@ const ChatBox = () => {
     // .is('seen_time', null);
 
     await supabase.from('messages')
-    .update({seen_time: new Date()})
-    .eq('from_user_id', user_id)
-    .is('seen_time', null);
+      .update({ seen_time: new Date() })
+      .eq('from_user_id', user_id)
+      .is('seen_time', null);
 
     // await supabase.from('messages')
     // .update({seen_time: null})
@@ -137,14 +165,14 @@ const ChatBox = () => {
     // .eq('to_user_id', user_id);
 
     const fetchUser = await supabase
-    .from('users')
-    .select('user_id,name')
-    .ilike('user_id', user_id);
+      .from('users')
+      .select('user_id,name')
+      .ilike('user_id', user_id);
 
     setChatUserName(fetchUser.data[0].name);
     setChatUserId(fetchUser.data[0].user_id);
-    getDistApplicants();
-    
+    getDistApplicants(false);
+
     const fetchUserMessages = await supabase
       .from('messages')
       .select()
@@ -155,6 +183,12 @@ const ChatBox = () => {
       setIsLoading(false);
       setUserMessages(fetchUserMessages.data);
       scollToRef.current.scrollIntoView();
+      setTimeout(() => {
+        //var container = document.getElementsByClassName('msg_card_body'),
+        //element = document.getElementById('lm');
+        //container.scrollTop = element.offsetTop;
+        document.getElementById('msg_card_body').scroll({ top: 7000, behavior: 'smooth' });
+      }, 1000);
     }
   }
 
@@ -178,7 +212,14 @@ const ChatBox = () => {
         ]).select();
       fetchUserMessages();
       scollToRef.current.scrollIntoView();
+      inputRef.current.focus();
       document.getElementById('message_textarea').value = "";
+      setTimeout(() => {
+        //var container = document.getElementsByClassName('msg_card_body'),
+        //element = document.getElementById('lm');
+        //container.scrollTop = element.offsetTop;
+        document.getElementById('msg_card_body').scroll({ top: 7000, behavior: 'smooth' });
+      }, 1000);
     } else {
       alert("Please enter the message");
     }
@@ -195,7 +236,7 @@ const ChatBox = () => {
       fetchUserData = await supabase
         .from('users')
         .select()
-        .like('name', '%' + e.target.value + '%')
+        .ilike('name', '%' + e.target.value + '%')
         .order('user_id', { ascending: true })
         .limit(100);
     }
@@ -225,40 +266,41 @@ const ChatBox = () => {
                 <input
                   type="search"
                   name="search-field"
+                  id="searchbar"
                   onChange={(e) => handleSearch(e)}
                   placeholder="Search"
                   required=""
                 />
               </div>
               {
-              isLoadingLeft &&
-              <div style={{ width: '20%', margin: "auto" }}>
-                <BallTriangle
-                  height={100}
-                  width={100}
-                  radius={5}
-                  color="#000"
-                  ariaLabel="ball-triangle-loading"
-                  wrapperClass={{}}
-                  wrapperStyle=""
-                  visible={true}
-                />
-              </div>
-            }
+                isLoadingLeft &&
+                <div style={{ width: '20%', margin: "auto" }}>
+                  <BallTriangle
+                    height={100}
+                    width={100}
+                    radius={5}
+                    color="#000"
+                    ariaLabel="ball-triangle-loading"
+                    wrapperClass={{}}
+                    wrapperStyle=""
+                    visible={true}
+                  />
+                </div>
+              }
             </div>
           </div>
           {/* End cart-heaer */}
 
           <div className="card-body contacts_body">
-          {/* <button onClick={() => scollToRef.current.scrollIntoView()}>Scroll</button> */}
-      
+
+
             <ul className="contacts">
               {
                 userData && userData.map((item, index) => {
                   //console.log('item', item);
-                  //let image_url = item.photo_url != null ? item.photo_url : '/images/resource/candidate-1.png';
+                  let image_url = item.photo_url != null ? item.photo_url : '/images/resource/candidate-1.png';
                   let message_url = '/messages?user=' + item.user_id;
-                  let image_url = '/images/resource/candidate-1.png';
+                  //let image_url = item.photo_url;
                   let a_id = user.id + item.user_id;
                   return (<li key={index}>
                     <a id={a_id} onClick={() => handleChatUser(item.user_id)}>
@@ -269,10 +311,11 @@ const ChatBox = () => {
                             alt="chatbox avatar"
                             width={90}
                             height={90}
+                            style={{ borderRadius: 3 }}
                           />
                         </div>
                         <div className="user_info w-100">
-                          <span>{item.name} <span className="text-danger pull-right">{item.count > 0 && ''+item.count+''}</span></span>
+                          <span>{item.name} <span className="text-danger pull-right">{item.count > 0 && '' + item.count + ''}</span></span>
                         </div>
                       </div>
                     </a>
@@ -292,12 +335,12 @@ const ChatBox = () => {
           <div className="card-header msg_head">
             <div className="d-flex bd-highlight">
               <div className="img_cont">
-              {chatUserName != null ? <img
+                {chatUserName != null ? <img
                   src="/images/resource/candidate-8.png"
                   alt=""
                   className="rounded-circle user_img"
                 /> : ""}
-                
+
               </div>
               <div className="user_info">
                 <span>{chatUserName != null ? chatUserName : ""}</span>
@@ -305,7 +348,8 @@ const ChatBox = () => {
             </div>
           </div>
 
-          <div className="card-body msg_card_body">
+          <div className="card-body msg_card_body" id="msg_card_body" ref={scollToRef} style={{ bottom: 0, height: "770px", overflow: 'auto' }}>
+            {/* <button onClick={() => scollToRef.current.scrollIntoView()}>Scroll</button> */}
             {
               isLoading &&
               <div style={{ width: '20%', margin: "auto" }}>
@@ -331,14 +375,20 @@ const ChatBox = () => {
             }
             {
               isLoading == false && userMessages && userMessages.map((item, index) => {
+
+                let lm = "msg";
                 let classNameSide = "d-flex justify-content-start";
                 let label_name = chatUserName;
                 if (item.from_user_id == user.id) {
                   classNameSide = "d-flex justify-content-end mb-2 reply";
                   label_name = "You";
                 }
+                if (userMessages.length == (parseInt(index) + parseInt(1))) {
+                  classNameSide += " last-message";
+                  lm = "lm";
+                }
                 return (
-                  <div key={index} className={classNameSide}>
+                  <div key={index} className={classNameSide} id={lm}>
                     <div className="img_cont_msg">
                       <img
                         src="/images/resource/candidate-3.png"
@@ -354,11 +404,8 @@ const ChatBox = () => {
                   </div>
                 )
               })
-
             }
           </div>
-
-
 
           <div className="card-footer">
             <div className="form-group mb-0">
@@ -367,6 +414,7 @@ const ChatBox = () => {
                   className="form-control type_msg"
                   placeholder="Type a message..."
                   id="message_textarea"
+                  ref={inputRef}
                   required
                 ></textarea>
                 <button
@@ -376,8 +424,8 @@ const ChatBox = () => {
                 >
                   Send Message
                 </button>
-                <div ref={scollToRef}></div>
               </form>
+              <div ref={scollToRef}></div>
             </div>
           </div>
         </div>

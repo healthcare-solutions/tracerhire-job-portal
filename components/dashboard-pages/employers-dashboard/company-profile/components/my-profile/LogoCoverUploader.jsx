@@ -108,6 +108,16 @@ const LogoCoverUploader = () => {
                             modified_at: dateFormat()
                         })
                         .eq('cust_dtl_id', data[0].cust_dtl_id);
+                    
+                    const { dataUpdateUser, errorUser } = await supabase
+                    .from('users')
+                    .update({
+                        user_photo: fileTimestamp + '-' + selectedFile.name
+                    })
+                    .eq('user_id', user.id);
+                    //console.log("dataUpdateUser",dataUpdateUser);
+                    //console.log("errorUser",errorUser);
+
                     setLogoFilename(cloudPath + fileTimestamp + '-' + selectedFile.name);
                 }
             }

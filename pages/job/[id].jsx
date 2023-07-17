@@ -30,24 +30,45 @@ const JobSingleDynamicV1 = () => {
   const user = useSelector(state => state.candidate.user)
   const showLoginButton = useMemo(() => !user?.id, [user])
   const router = useRouter();
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+  const [companyLogo, setCompanyLogo] = useState("");
   const [company, setCompany] = useState({});
+  const [custDtl, setCustDtl] = useState([]);
   const id = router.query.id;
 
   const fetchCompany = async () => {
-    try{
+    try {
       if (id) {
         let { data: jobs, error } = await supabase
-            .from('jobs')
-            .select("*")
+          .from('jobs')
+          .select("*")
 
-            // Filters
-            .eq('job_id', id)
+          // Filters
+          .eq('job_id', id)
 
         if (jobs) {
-          setCompany(jobs[0])
+
+          setCompany(jobs[0]);
+          if (jobs && jobs[0].user_id != "") {
+            //setCustDtl()
+            let customer_details = await supabase
+              .from('cust_dtl')
+              .select("*")
+              .eq('cust_id', jobs[0].user_id);
+            console.log("customer_details", customer_details.data);
+            if (customer_details && customer_details.data[0] != "") {
+              setCustDtl(customer_details.data[0]);
+              if (customer_details.data[0].profile_logo != null) {
+                setCompanyLogo(cloudPath + customer_details.data[0].profile_logo);
+              } else {
+                setCompanyLogo("/images/resource/candidate-1.png");
+              }
+            }
+          }
         }
       }
-    } catch(e) {
+    } catch (e) {
+      console.log("Error", e);
       toast.error('System is unavailable.  Please try again later or contact tech support!', {
         position: "bottom-right",
         autoClose: false,
@@ -65,21 +86,21 @@ const JobSingleDynamicV1 = () => {
   const fetchPostForLoggedInUser = async () => {
     // TODO: skip this check for employer login
     if (id && !showLoginButton) {
-        let { data: application, error } = await supabase
-            .from('applications')
-            .select("*")
+      let { data: application, error } = await supabase
+        .from('applications')
+        .select("*")
 
-            // Filters
-            .eq('email', user.email)
-            .eq('job_id', id)
+        // Filters
+        .eq('email', user.email)
+        .eq('job_id', id)
 
-        if (application?.length > 0) {
-            setIsUserApplied(true);
-        } else {
-            setIsUserApplied(false);
-        }
-    } else {
+      if (application?.length > 0) {
+        setIsUserApplied(true);
+      } else {
         setIsUserApplied(false);
+      }
+    } else {
+      setIsUserApplied(false);
     }
   };
 
@@ -106,7 +127,7 @@ const JobSingleDynamicV1 = () => {
       <LoginPopup />
       {/* End Login Popup Modal */}
 
-      { showLoginButton ?  <DefaulHeader2 /> : <DashboardHeader/>}
+      {showLoginButton ? <DefaulHeader2 /> : <DashboardHeader />}
       {/* <!--End Main Header --> */}
 
       <MobileMenu />
@@ -119,7 +140,7 @@ const JobSingleDynamicV1 = () => {
             <div className="job-block-seven">
               <div className="inner-box">
                 <div>
-{/*
+                  {/*
                   <span className="company-logo">
                     <img src={company?.logo} alt="logo" />
                   </span>
@@ -127,41 +148,41 @@ const JobSingleDynamicV1 = () => {
                   <h4>{company?.job_title}</h4>
 
                   <ul className="job-info">
-                    { company?.job_type ?
-                        <li>
-                          <span className="icon flaticon-clock-3"></span>
-                          {company?.job_type}
-                        </li>
-                        : '' }
+                    {company?.job_type ?
+                      <li>
+                        <span className="icon flaticon-clock-3"></span>
+                        {company?.job_type}
+                      </li>
+                      : ''}
                     {/* compnay info */}
-                    { company?.job_address ?
-                        <li>
-                          <span className="icon flaticon-map-locator"></span>
-                          {company?.job_address}
-                        </li>
-                        : '' }
+                    {company?.job_address ?
+                      <li>
+                        <span className="icon flaticon-map-locator"></span>
+                        {company?.job_address}
+                      </li>
+                      : ''}
                     {/* location info */}
-{/*
+                    {/*
                     <li>
                       <span className="icon flaticon-briefcase"></span>{" "}
                       {company?.industry}
                     </li>
  */}
                     {/* time info */}
-                    { company?.salary ?
-                        <li>
-                          <span className="icon flaticon-money"></span>{" "}
-                         ${company?.salary} {company?.salary_rate}
-                        </li>
-                        : '' }
+                    {company?.salary ?
+                      <li>
+                        <span className="icon flaticon-money"></span>{" "}
+                        ${company?.salary} {company?.salary_rate}
+                      </li>
+                      : ''}
                     {/* salary info */}
                   </ul>
                   {/* End .job-info */}
 
-{/*
+                  {/*
                   <ul className="job-other-info">
                      */}
-{/* {company?.jobType?.map((val, i) => (
+                  {/* {company?.jobType?.map((val, i) => (
                       <li key={i} className={`${val.styleClass}`}>
                         {val.type}
                       </li>
@@ -174,31 +195,31 @@ const JobSingleDynamicV1 = () => {
                 </div>
                 {/* End .content */}
 
-                { !showLoginButton && isUserApplied ?
-                    <button className="btn-box theme-btn btn-style-nine">
-                        ✓ Applied
-                      {/* <button className="bookmark-btn">
+                {!showLoginButton && isUserApplied ?
+                  <button className="btn-box theme-btn btn-style-nine">
+                    ✓ Applied
+                    {/* <button className="bookmark-btn">
                         <i className="flaticon-bookmark"></i>
                       </button> */}
-                    </button>
+                  </button>
 
-                    : ''}
+                  : ''}
 
-                { !showLoginButton && !isUserApplied && user.role == 'CANDIDATE' ?
-                    <div className="btn-box">
-                      <a
-                        href="#"
-                        className="theme-btn btn-style-one"
-                        data-bs-toggle="modal"
-                        data-bs-target="#applyJobModal"
-                      >
-                        Apply For Job
-                      </a>
-                      {/* <button className="bookmark-btn">
+                {!showLoginButton && !isUserApplied && user.role == 'CANDIDATE' ?
+                  <div className="btn-box">
+                    <a
+                      href="#"
+                      className="theme-btn btn-style-one"
+                      data-bs-toggle="modal"
+                      data-bs-target="#applyJobModal"
+                    >
+                      Apply For Job
+                    </a>
+                    {/* <button className="bookmark-btn">
                           <i className="flaticon-bookmark"></i>
                         </button> */}
-                    </div>
-                    : ''}
+                  </div>
+                  : ''}
 
                 {/* <!-- Modal --> */}
                 <div
@@ -220,7 +241,7 @@ const JobSingleDynamicV1 = () => {
                       </div>
                       {/* End modal-header */}
 
-                      <ApplyJobModalContent company={company}/>
+                      <ApplyJobModalContent company={company} />
                       {/* End PrivateMessageBox */}
                     </div>
                     {/* End .send-private-message-wrapper */}
@@ -241,7 +262,7 @@ const JobSingleDynamicV1 = () => {
                 <JobDetailsDescriptions company={company} />
                 {/* End jobdetails content */}
 
-{/*
+                {/*const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
                 <div className="other-options">
                   <div className="social-share">
                     <h5>Share this job</h5>
@@ -251,7 +272,7 @@ const JobSingleDynamicV1 = () => {
  */}
                 {/* <!-- Other Options --> */}
 
-{/*
+                {/*
                 <div className="related-jobs">
                   <div className="title-box">
                     <h3>Related Jobs</h3>
@@ -260,7 +281,7 @@ const JobSingleDynamicV1 = () => {
                     </div>
                   </div>
                    */}
-{/* End title box */}{/*
+                {/* End title box */}{/*
 
 
                   <RelatedJobs />
@@ -272,13 +293,13 @@ const JobSingleDynamicV1 = () => {
 
               <div className="sidebar-column col-lg-4 col-md-12 col-sm-12">
                 <aside className="sidebar">
-                  { showLoginButton ?
-                      <div className="sidebar-widget">
-                        {/* <!-- Job Overview --> */}
-                        <h4 className="widget-title">APPLY INSTANTLY</h4>
-                        <ApplyInstantView company={company} />
-                      </div>
-                    : '' }
+                  {showLoginButton ?
+                    <div className="sidebar-widget">
+                      {/* <!-- Job Overview --> */}
+                      <h4 className="widget-title">APPLY INSTANTLY</h4>
+                      <ApplyInstantView company={company} />
+                    </div>
+                    : ''}
 
                   <div className="sidebar-widget">
                     {/* <!-- Job Overview --> */}
@@ -287,54 +308,44 @@ const JobSingleDynamicV1 = () => {
                   </div>
                   {/* End .sidebar-widget */}
 
-{/*
-                  <div className="sidebar-widget company-widget">
-                    <div className="widget-content">
-                      <div className="company-title">
-                        <div className="company-logo">
-                          <img src={company.logo} alt="resource" />
+                  {custDtl.company_name != null &&
+                    <div className="sidebar-widget company-widget">
+                      <div className="widget-content">
+                        <div className="company-title">
+                          <div className="company-logo">
+                            <img src={companyLogo} alt="resource" />
+                          </div>
+                          <h5 className="company-name">{company.company}</h5>
+                          <a href="#" className="profile-link">
+                            {custDtl.company_name != null ? custDtl.company_name : "Undefined"}
+                          </a>
                         </div>
-                        <h5 className="company-name">{company.company}</h5>
-                        <a href="#" className="profile-link">
-                          View company profile
-                        </a>
+                        {custDtl.city != null && <CompnayInfo company={custDtl} />}
+
+                        {
+                          custDtl.website != null &&
+                          <div className="btn-box">
+                            <a
+                              href="#"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="theme-btn btn-style-three"
+                            >
+                              {custDtl.website}
+                            </a>
+                          </div>
+                        }
+
                       </div>
-                       */}
-{/* End company title */}{/*
-
-
-                      <CompnayInfo company={company} />
-
-                      <div className="btn-box">
-                        <a
-                          href="#"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="theme-btn btn-style-three"
-                        >
-                          {company?.link}
-                        </a>
-                      </div>
-                       */}
-{/* End btn-box */}{/*
-
                     </div>
-                  </div>
- */}
-                  {/* End .company-widget */}
+                  }
                 </aside>
-                {/* End .sidebar */}
               </div>
-              {/* End .sidebar-column */}
             </div>
           </div>
         </div>
-        {/* <!-- job-detail-outer--> */}
       </section>
-      {/* <!-- End Job Detail Section --> */}
       <Footer />
-      {/* <FooterDefault footerStyle="alternate5" /> */}
-      {/* <!-- End Main Footer --> */}
     </>
   );
 };

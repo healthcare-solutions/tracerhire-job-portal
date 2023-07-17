@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 import axios from 'axios'
 
 const ApplyInstantView = ({ company }) => {
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,6 +18,8 @@ const ApplyInstantView = ({ company }) => {
   const [emailError, setEmailError] = useState("");
   const [licenseNumberError, setLicenseNumberError] = useState("");
   const [guestSelectedFile, setGuestSelectedFile] = useState(null);
+  const [isChecked, setIsChecked] = useState(false);
+  const [termsConditionsError, setTermsConditionsError] = useState("");
 
   const router = useRouter();
   const jobId = router.query.id;
@@ -26,25 +27,35 @@ const ApplyInstantView = ({ company }) => {
     setGuestSelectedFile(event.target.files[0]);
   }
 
+  const checkHandler = () => {
+    console.log("Check Handler Called.....");
+    setIsChecked(!isChecked)
+  }
+
   const validateForm = () => {
+    console.log("isChecked",isChecked);
     let isValid = true;
     if (!firstName) {
       setFirstNameError("Please enter your first name");
       isValid = false;
     }
-    if (!lastName) {
+    else if (!lastName) {
       setLastNameError("Please enter your last name");
       isValid = false;
     }
-    if (!email) {
+    else if (!email) {
       setEmailError("Please enter your email address");
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       setEmailError("Please enter a valid email address");
       isValid = false;
     }
-    if (!licenseNumber) {
+    else if (!licenseNumber) {
       setLicenseNumberError("Please enter your License Number");
+      isValid = false;
+    }
+    else if (!isChecked) {
+      setTermsConditionsError("Please check terms and conditions");
       isValid = false;
     }
     return isValid;
@@ -53,129 +64,134 @@ const ApplyInstantView = ({ company }) => {
   async function handleSubmit(event) {
     event.preventDefault();
     if (validateForm()) {
-        if (guestSelectedFile) {
-          let file;
-          let fileTimestamp = Date.now()
+      if (guestSelectedFile) {
+        let file;
+        let fileTimestamp = Date.now()
 
-          // upload document to applications/cv folder
-          const { data: guestFileUploadSuccess, error: guestFileUploadError } = await supabase
-              .storage 
-              .from('applications')
-              .upload('cv/' + fileTimestamp + '-' + guestSelectedFile.name, guestSelectedFile, file);
-          if (guestFileUploadError) {
-            if (guestFileUploadError.error == "Payload too large") {
-              toast.error('Failed to upload attachment.  Attachment size exceeded maximum allowed size!', {
-                position: "bottom-right",
-                autoClose: false,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-              });
-            } else {
-              toast.error('System is unavailable.  Please try again later or contact tech support!', {
-                position: "bottom-right",
-                autoClose: false,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-              });
-            }
-          } else {
-            // get document downloadable url
-            const { data: docURL, error: docURLError } = supabase
-                .storage
-                .from('applications')
-                .getPublicUrl('cv/' + fileTimestamp + '-' + guestSelectedFile.name)
-            if (docURLError) {
-              console.warn('Failed to get download URL for file')
-            }
-
-            // save applied application
-            const { data: applications, error: applicationsError } = await supabase
-                .from('applications')
-                .insert([
-                  { 
-                    email: email,
-                    name: firstName + " " + lastName,
-                    license_nbr: licenseNumber,
-                    doc_name: guestSelectedFile.name,
-                    doc_size: guestSelectedFile.size,
-                    doc_typ: guestSelectedFile.type,
-                    job_id: jobId,
-                    doc_dwnld_url: docURL
-                  }
-                ])
-
-            if (applicationsError) {
-              toast.error('Error while Applying in this job, Please try again later!', {
-                position: "bottom-right",
-                autoClose: false,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-              });
-            } else {
-              let time = new Date()
-              const toBase64 = file => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                  let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
-                  if ((encoded.length % 4) > 0) {
-                    encoded += '='.repeat(4 - (encoded.length % 4));
-                  }
-                  resolve(encoded);
-                };
-                reader.onerror = reject;
+        // upload document to applications/cv folder
+        const { data: guestFileUploadSuccess, error: guestFileUploadError } = await supabase
+          .storage
+          .from('applications')
+          .upload('cv/' + fileTimestamp + '-' + guestSelectedFile.name, guestSelectedFile, file);
+        if (guestFileUploadError) {
+          if (guestFileUploadError.error == "Payload too large") {
+            toast.error('Failed to upload attachment.  Attachment size exceeded maximum allowed size!', {
+              position: "bottom-right",
+              autoClose: false,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
             });
-
-              const fileBase64 = await toBase64(guestSelectedFile)
-
-                axios({
-                  method: 'POST',
-                  url: '/api/mail',
-                  data: {
-                    name: firstName + " " + lastName,
-                    redirectionUrl: `https://immensecareer.com`,
-                    time: time.toLocaleString('en-US'),
-                    jobId: jobId,
-                    jobTitle: company.job_title,
-                    jobCompAdd: company.job_comp_add,
-                    attachments: [
-                      {
-                        content: fileBase64,
-                        filename: guestSelectedFile.name,
-                        type: guestSelectedFile.type,
-                        disposition: "attachment"
-                      }
-                    ]
-                  }
-                })       
-              // open toast
-              toast.success('Successfully Applied in this job!', {
-                position: "bottom-right",
-                autoClose: 8000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-              });
-            }
+          } else {
+            toast.error('System is unavailable.  Please try again later or contact tech support!', {
+              position: "bottom-right",
+              autoClose: false,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
           }
         } else {
-          console.warn("No file selected.");
+          // get document downloadable url
+          const { data: docURL, error: docURLError } = supabase
+            .storage
+            .from('applications')
+            .getPublicUrl('cv/' + fileTimestamp + '-' + guestSelectedFile.name)
+          if (docURLError) {
+            console.warn('Failed to get download URL for file')
+          }
+
+          // save applied application
+          const { data: applications, error: applicationsError } = await supabase
+            .from('applications')
+            .insert([
+              {
+                email: email,
+                name: firstName + " " + lastName,
+                license_nbr: licenseNumber,
+                doc_name: guestSelectedFile.name,
+                doc_size: guestSelectedFile.size,
+                doc_typ: guestSelectedFile.type,
+                job_id: jobId,
+                doc_dwnld_url: docURL,
+                status: "New",
+                cust_id: company.user_id
+              }
+            ])
+
+          if (applicationsError) {
+            toast.error('Error while Applying in this job, Please try again later!', {
+              position: "bottom-right",
+              autoClose: false,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
+          } else {
+            let time = new Date()
+            const toBase64 = file => new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+              reader.onload = () => {
+                let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
+                if ((encoded.length % 4) > 0) {
+                  encoded += '='.repeat(4 - (encoded.length % 4));
+                }
+                resolve(encoded);
+              };
+              reader.onerror = reject;
+            });
+
+            const fileBase64 = await toBase64(guestSelectedFile)
+
+            axios({
+              method: 'POST',
+              url: '/api/mail',
+              data: {
+                name: firstName + " " + lastName,
+                redirectionUrl: `https://immensecareer.com`,
+                time: time.toLocaleString('en-US'),
+                jobId: jobId,
+                jobTitle: company.job_title,
+                jobCompAdd: company.job_comp_add,
+                attachments: [
+                  {
+                    content: fileBase64,
+                    filename: guestSelectedFile.name,
+                    type: guestSelectedFile.type,
+                    disposition: "attachment"
+                  }
+                ]
+              }
+            })
+            // open toast
+            toast.success('Successfully Applied in this job!', {
+              position: "bottom-right",
+              autoClose: 8000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
+            setTimeout(() => {
+              location.reload();  
+            }, 2000);
+          }
         }
+      } else {
+        console.warn("No file selected.");
+      }
     }
   }
 
@@ -273,15 +289,32 @@ const ApplyInstantView = ({ company }) => {
 
         <div className="col-lg-12 col-md-12 col-sm-12 form-group">
           <div className="input-group checkboxes square">
-            <input type="checkbox" name="remember-me" id="rememberMe" />
-            <label htmlFor="rememberMe" className="remember">
+            <div className="row">
+              <div className="col-md-1">
+              <input
+              type="checkbox"
+              name="remember-me"
+              id="rememberMe"
+              style={{display:'block',position:'relative', top:10}}
+              checked={isChecked}
+              onChange={() => checkHandler()}
+            />
+              </div>
+              <div className="col-md-11">
+              <span
+              htmlFor="rememberMe" className="remember">
               <span className="custom-checkbox"></span> You accept our{" "}
               <span data-bs-dismiss="modal">
                 <Link href="/terms">
                   Terms and Conditions and Privacy Policy
                 </Link>
+                {termsConditionsError && <div className="required">{termsConditionsError}</div>}
               </span>
-            </label>
+            </span>
+              </div>
+            </div>
+            
+            
           </div>
         </div>
         {/* End .col */}

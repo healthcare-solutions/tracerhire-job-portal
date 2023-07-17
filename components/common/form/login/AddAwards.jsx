@@ -9,8 +9,8 @@ const AddAwards = (props) => {
   const title_value= props.title_value;
   const subtitle_value= props.subtitle_value;
   const description_value= props.description_value;
-  const from_date= props.from_date;
-  const to_date= props.to_date;
+  const from_date_value = props.from_date_value;
+  const to_date_value = props.to_date_value;
   return (
     <>
       <div className="modal fade" id="loginPopupModalAward">
@@ -35,8 +35,8 @@ const AddAwards = (props) => {
                     title_value={title_value} 
                     subtitle_value={subtitle_value} 
                     description_value={description_value} 
-                    from_date={from_date} 
-                    to_date={to_date}
+                    from_date_value={from_date_value} 
+                    to_date_value={to_date_value}
                   />
                 </div>
               </div>

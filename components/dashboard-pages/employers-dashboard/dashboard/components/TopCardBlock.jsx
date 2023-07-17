@@ -41,42 +41,20 @@ const TopCardBlock = () => {
       setTotalApplications(countTotalApplications.count);
     }
 
-    
+    let total_unread = 0;
 
-      let total_unread = 0;
+    const fetchToData = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .is('seen_time', null)
+      .eq('to_user_id', user.id);
 
-      const fetchToData = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .is('seen_time', null)
-          .eq('to_user_id', user.id);
-
-      const fetchFromData = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .is('seen_time', null)
-          .eq('from_user_id', user.id);
-
-      if (fetchToData.count > 0) {
-          total_unread += fetchToData.count;
-      }
-      if (fetchFromData.count > 0) {
-          total_unread += fetchFromData.count;
-      }
-      //console.log("total_unread", total_unread);
-      if (total_unread > 0) {
-        setTotalMessages(total_unread);
-      }
-  
-
-    // let countTotalMessages = await supabase
-    //   .from('messages')
-    //   .select('*', { count: 'exact', head: true })
-    //   .eq('user_id', user.id)
-    //   .is('deleted', null);
-    // if (countTotalMessages.count > 0) {
-    //   setTotalMessages(countTotalMessages.count);
-    // }
+    if (fetchToData.count > 0) {
+      total_unread += fetchToData.count;
+    }
+    if (total_unread > 0) {
+      setTotalMessages(total_unread);
+    }
 
     let countTotalShortlist = await supabase
       .from('applications')

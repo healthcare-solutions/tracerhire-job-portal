@@ -11,13 +11,14 @@ const Awards = () => {
   const user = useSelector(state => state.candidate.user);
   const [resumeData, setResumeData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
     fetchCandidateResume();
   }, []);
 
   const handleDeleteRow = async (id) => {
-    if (confirm("Are you sure you wanna delete?")) {
+    if (confirm("Are you sure want to delete this Award?")) {
       await supabase
         .from('candidate_resumes')
         .update({ deleted: 'yes' })
@@ -70,11 +71,13 @@ const Awards = () => {
         subtitle=""
         description="Details"
         id="0"
+        from_date={currentDate}
+        to_date={currentDate}
         title_value=""
         subtitle_value=""
         description_value=""
-        from_date_value=""
-        to_date_value=""
+        from_date_value="" 
+        to_date_value="" 
       />
 
       <div className="resume-block">

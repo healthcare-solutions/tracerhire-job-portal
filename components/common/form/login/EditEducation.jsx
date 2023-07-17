@@ -1,7 +1,7 @@
 import Register from "../register/Register";
 import FormContentEducation from "./FormContentEducation";
 
-const EditAwards = (props) => {
+const EditEducation = (props) => {
   const type = props.type;
   const title = props.title;
   const sub_title = props.subtitle;
@@ -77,4 +77,4 @@ const EditAwards = (props) => {
   );
 };
 
-export default EditAwards;
+export default EditEducation;

@@ -3,13 +3,17 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from "react-redux";
 import { supabase } from "../../../../config/supabaseClient";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const FormContentExperience = (props) => {
   const [id, setId] = useState(props.id > 0 ? props.id : 0);
   const [degree, setDegree] = useState(props.title_value != "" ? props.title_value : "");
   const [school, setSchool] = useState(props.subtitle_value != "" ? props.subtitle_value : "");
-  const [fromDate, setFromDate] = useState(props.from_date_value != "" ? props.from_date_value : "");
-  const [toDate, setToDate] = useState(props.to_date_value != "" ? props.to_date_value : "");
+  // const [fromDate, setFromDate] = useState(props.from_date_value != "" ? props.from_date_value : "");
+  // const [toDate, setToDate] = useState(props.to_date_value != "" ? props.to_date_value : "");
+  const [fromDate, setFromDate] = useState(props.from_date_value != "" ? new Date(props.from_date_value) : "");
+  const [toDate, setToDate] = useState(props.to_date_value != "" ? new Date(props.to_date_value) : "");
   const [description, setDescription] = useState(props.description_value != "" ? props.description_value : "");
   const user = useSelector(state => state.candidate.user);
 
@@ -116,25 +120,37 @@ const FormContentExperience = (props) => {
 
         <div className="form-group">
           <label>From Date <span className="required">(required)</span></label>
-          <input
+          {/* <input
             type="date"
             name="from Date"
             placeholder="From Date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
             required
+          /> */}
+          <DatePicker 
+          maxDate={new Date()}
+          selected={fromDate} 
+          placeholderText="MM/DD/YYYY"
+          onChange={(e) => setFromDate(e)}
           />
         </div>
 
         <div className="form-group">
           <label>To Date <span className="required">(required)</span></label>
-          <input
+          {/* <input
             type="date"
             name="to Date"
             placeholder="To Date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
             required
+          /> */}
+          <DatePicker 
+          selected={toDate} 
+          maxDate={new Date()}
+          placeholderText="MM/DD/YYYY"
+          onChange={(e) => setToDate(e)}
           />
         </div>
 

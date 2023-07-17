@@ -24,8 +24,10 @@ const Index = () => {
   const timeAgo = new TimeAgo('en-US');
   const dispatch = useDispatch();
   const scollToRef = useRef();
+  const inputRef = useRef(null);
   const user = useSelector(state => state.candidate.user)
   const router = useRouter();
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLeft, setIsLoadingLeft] = useState(false);
   const [userData, setUserData] = useState([]);
@@ -33,8 +35,10 @@ const Index = () => {
   const [chatUserId, setChatUserId] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
 
-  const getDistApplicants = async () => {
-    setIsLoadingLeft(true);
+  const getDistApplicants = async (showLoading) => {
+    if(showLoading){
+      setIsLoadingLeft(true);
+    }
     const fetchUser = await supabase
       .from('users')
       .select()
@@ -50,14 +54,21 @@ const Index = () => {
           .from('messages')
           .select('*', { count: 'exact', head: true })
           .is('seen_time', null)
+          .eq('to_user_id', user.id)
           .eq('from_user_id', element.user_id);
+          let photo_url = '/images/resource/candidate-1.png';
+          if(element.user_photo != null){
+            photo_url = cloudPath+element.user_photo;
+          } else if(element.photo_url != null){
+            photo_url = element.photo_url;
+          }
           let objData = {
             user_id: element.user_id,
             created_at: element.created_at,
             email: element.email,
             name: element.name,
             phone_number: element.phone_number,
-            photo_url: element.photo_url,
+            photo_url: photo_url,
             count : fetchOneData.count
           }
           arrData.push(objData);
@@ -71,7 +82,7 @@ const Index = () => {
   }
 
   useEffect(() => {
-    getDistApplicants();
+    getDistApplicants(true);
   }, []);
 
   const chatToggle = () => {
@@ -89,6 +100,7 @@ const Index = () => {
       .limit(100);
     if (fetchUserMessages) {
       setUserMessages(fetchUserMessages.data);
+      inputRef.current.focus();
       setIsLoading(false);
     }
   }
@@ -98,6 +110,7 @@ const Index = () => {
     setUserMessages([]);
 
     document.getElementById('message_textarea').value = "";
+    document.getElementById('searchbar').value = "";
     
     // await supabase.from('messages')
     // .update({seen_time: new Date()})
@@ -124,7 +137,7 @@ const Index = () => {
     
     setChatUserName(fetchUser.data[0].name);
     setChatUserId(fetchUser.data[0].user_id);
-    getDistApplicants();
+    getDistApplicants(false);
     
     const fetchUserMessages = await supabase
       .from('messages')
@@ -135,7 +148,14 @@ const Index = () => {
     if (fetchUserMessages) {
       setIsLoading(false);
       setUserMessages(fetchUserMessages.data);
+      inputRef.current.focus();
       scollToRef.current.scrollIntoView();
+      setTimeout(() => {
+        //var container = document.getElementsByClassName('msg_card_body'),
+        // element = document.getElementById('lm');
+        // container.scrollTop = element.offsetTop;
+        document.getElementById('msg_card_body').scroll({ top: 7000, behavior: 'smooth' });
+      }, 1000);
     }
   }
 
@@ -159,27 +179,37 @@ const Index = () => {
         ]).select();
       fetchUserMessages();
       scollToRef.current.scrollIntoView();
+      inputRef.current.focus();
       document.getElementById('message_textarea').value = "";
+      setTimeout(() => {
+        //var container = document.getElementsByClassName('msg_card_body'),
+        // element = document.getElementById('lm');
+        // container.scrollTop = element.offsetTop;
+        document.getElementById('msg_card_body').scroll({ top: 7000, behavior: 'smooth' });
+      }, 1000);
     } else {
       alert("Please enter the message");
     }
   }
 
   const handleSearch = async (e) => {
-    let fetchUserData = await supabase
-      .from('users')
-      .select()
-      .ilike('role', 'CANDIDATE')
-      .order('user_id', { ascending: true })
-      .limit(100);
-    if (e.target.value != "") {
+    let fetchUserData = '';
+    //if (e.target.value != "") {
       fetchUserData = await supabase
         .from('users')
         .select()
-        .like('name', '%' + e.target.value + '%')
+        .ilike('role', 'CANDIDATE')
+        .ilike('name', '%' + e.target.value + '%')
         .order('user_id', { ascending: true })
         .limit(100);
-    }
+    // } else {
+    //   fetchUserData = await supabase
+    //   .from('users')
+    //   .select()
+    //   .ilike('role', 'CANDIDATE')
+    //   .order('user_id', { ascending: true })
+    //   .limit(100);
+    // }
     setUserData(fetchUserData.data);
   }
 
@@ -231,6 +261,7 @@ const Index = () => {
                 <input
                   type="search"
                   name="search-field"
+                  id="searchbar"
                   onChange={(e) => handleSearch(e)}
                   placeholder="Search"
                   required=""
@@ -261,9 +292,10 @@ const Index = () => {
               {
                 userData && userData.map((item, index) => {
                   //console.log('item', item);
-                  //let image_url = item.photo_url != null ? item.photo_url : '/images/resource/candidate-1.png';
+                  let image_url = item.photo_url != null ? item.photo_url : '/images/resource/candidate-1.png';
                   let message_url = '/messages?user=' + item.user_id;
-                  let image_url = '/images/resource/candidate-1.png';
+                  //let image_url = '/images/resource/candidate-1.png';
+                  //let image_url = item.photo_url;
                   let a_id = user.id + item.user_id;
                   return (<li key={index}>
                     <a id={a_id} onClick={() => handleChatUser(item.user_id)}>
@@ -274,6 +306,7 @@ const Index = () => {
                             alt="chatbox avatar"
                             width={90}
                             height={90}
+                            style={{borderRadius:3}}
                           />
                         </div>
                         <div className="user_info w-100">
@@ -310,7 +343,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="card-body msg_card_body">
+          <div className="card-body msg_card_body" id="msg_card_body" ref={scollToRef} style={{ bottom: 0, height: "770px", overflow: 'auto' }}>
             {
               isLoading &&
               <div style={{ width: '20%', margin: "auto" }}>
@@ -335,7 +368,7 @@ const Index = () => {
               </div>
             }
             {
-              userMessages && userMessages.map((item, index) => {
+              userMessages && userMessages.length > 0 && userMessages.map((item, index) => {
                 let classNameSide = "d-flex justify-content-start";
                 let label_name = chatUserName;
                 if (item.from_user_id == user.id) {
@@ -372,6 +405,7 @@ const Index = () => {
                   className="form-control type_msg"
                   placeholder="Type a message..."
                   id="message_textarea"
+                  ref={inputRef}
                   required
                 ></textarea>
                 <button

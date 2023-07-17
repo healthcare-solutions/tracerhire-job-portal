@@ -48,6 +48,13 @@ module.exports = [
         routePath: "/candidates-dashboard/cv-manager",
         active: "",
     },
+    {
+        id: 8,
+        name: "Feedback",
+        icon: "la-user-tie",
+        routePath: "/candidates-dashboard/feedback",
+        active: "",
+      },
     // {
     //     id: 8,
     //     name: "Packages",

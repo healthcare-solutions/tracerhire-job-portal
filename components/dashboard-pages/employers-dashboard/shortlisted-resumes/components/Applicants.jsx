@@ -15,6 +15,7 @@ const Applicants = () => {
   const router = useRouter();
 
   const [rpp, setRpp] = useState(200);
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
   const [arrPages, setArrPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -43,7 +44,7 @@ const Applicants = () => {
         .from('applications_view')
         .select()
         //.eq('cust_id', user.id)
-        .like('name', '%' + newKeyword + '%')
+        .ilike('name', '%' + newKeyword + '%')
         //.not('status',"eq",'Qualified');
         .order('created_at', { ascending: false })
         .limit(100);
@@ -53,10 +54,47 @@ const Applicants = () => {
           (obj, index) =>
             data.findIndex((item) => item.user_id === obj.user_id) === index
         );
+        let arrData = [];
+          for (const item of unique) {
+            const fetchUser = await supabase
+            .from('cust_dtl')
+            .select()
+            .eq('cust_id',item.user_id);
+            if(fetchUser){
+              let photo_url = '/images/resource/candidate-1.png';
+              if(fetchUser.data.length > 0 && fetchUser.data[0].profile_logo != null){
+                photo_url = cloudPath+fetchUser.data[0].profile_logo;
+              }
+              if(fetchUser.data.length > 0){
+                let objData = {
+                  application_id: item.application_id,
+                  created_at: item.created_at,
+                  cust_id: item.cust_id,
+                  doc_dwnld_url: item.doc_dwnld_url,
+                  email: item.email,
+                  job_id: item.job_id,
+                  name: item.name,
+                  status: item.status,
+                  user_id: item.user_id,
+                  photo_url : photo_url,
+                  city:fetchUser.data[0].city,
+                  state:fetchUser.data[0].st_cd,
+                  country:fetchUser.data[0].country,
+                  job_title: fetchUser.data[0].company_name,
+                  departments: fetchUser.data[0].departments != "" ? fetchUser.data[0].departments.split(",") : ""
+                }
+                arrData.push(objData);
+              }
+            }
+          }
+          // Make Record Unique Over //
+          if(arrData){
+            setUserData(arrData);
+          } else {
+            setUserData(unique);
+          }
         // Make Record Unique Over //
 
-        setUserData(unique);
-        //setUserData(data);
         setIsLoading(false);
       }
     } else {
@@ -115,14 +153,54 @@ const Applicants = () => {
             (obj, index) =>
               data.findIndex((item) => item.user_id === obj.user_id) === index
           );
+          let arrData = [];
+          for (const item of unique) {
+            const fetchUser = await supabase
+            .from('cust_dtl')
+            .select()
+            .eq('cust_id',item.user_id);
+            if(fetchUser && fetchUser !== undefined){
+              let photo_url = '/images/resource/candidate-1.png';
+              if(fetchUser.data.length > 0 && fetchUser.data[0].profile_logo != null){
+                photo_url = cloudPath+fetchUser.data[0].profile_logo;
+              }
+              if(fetchUser.data[0] !== undefined){
+                console.log("fetchUser.data[0].departments",fetchUser.data[0].departments);
+                let objData = {
+                  application_id: item.application_id,
+                  created_at: item.created_at,
+                  cust_id: item.cust_id,
+                  doc_dwnld_url: item.doc_dwnld_url,
+                  email: item.email,
+                  job_id: item.job_id,
+                  job_title: item.job_title,
+                  name: item.name,
+                  status: item.status,
+                  user_id: item.user_id,
+                  photo_url : photo_url,
+                  city:fetchUser.data[0].city,
+                  state:fetchUser.data[0].st_cd,
+                  country:fetchUser.data[0].country,
+                  job_title: fetchUser.data[0].company_name,
+                  departments: fetchUser.data[0].departments != "" ? fetchUser.data[0].departments.split(",") : ""
+                }
+                arrData.push(objData);
+              }
+            }
+          }
           // Make Record Unique Over //
-
-          setUserData(unique);
+          if(arrData){
+            setUserData(arrData);
+          } else {
+            setUserData(unique);
+          }
           setIsLoading(false);
         }
       }
     }
   }
+
+  console.log("userData",userData);
 
   const ViewCV = async (url) => {
     window.open(url, '_blank', 'noreferrer');
@@ -292,46 +370,22 @@ const Applicants = () => {
         >
           <div className="inner-box">
             <div className="content job-other-info">
-              <figure className="image">
-              <img src={"/images/resource/candidate-1.png"} alt="candidates" />
-                
-              </figure>
-              <h4 className="name"><Link href={'/candidates-single-v1/'+candidate.user_id} className="text-nowrap m-1">{candidate.name}{candidate.id}</Link></h4>
+              <figure className="image"><img src={candidate.photo_url} alt="candidates" /></figure>
+              <h4 className="name"><Link href={'/candidate-details/'+candidate.user_id} className="text-nowrap m-1">{candidate.name}{candidate.id}</Link></h4>
 
               <ul className="candidate-info">
-                <li className="designation">{candidate.license_nbr}</li>
+                <li className="designation w-100 mb-3"><span style={{fontSize:15}} className="icon flaticon-map-locator"><small style={{fontSize:15, paddingLeft:5, position:'relative', top:-3}}>{candidate.city},{candidate.state}</small></span></li>
 
                 {
-                  candidate.status != null && <li className={candidate.status == 'Qualified' ? 'privacy' : 'required'}>{candidate.status}</li>
+                    // <li className={'privacy'}><small>{candidate.departments}</small></li>
+                    candidate.departments != "" && candidate.departments.length > 0 && candidate.departments.map((item,index) => {
+                      return(
+                        <li className={'privacy'}><small>{item}</small></li>
+                      )
+                  })
                 }
 
               </ul>
-              <div className="small" style={{ fontSize: 10, lineHeight: "10px" }}>{candidate.candidate_message}</div>
-              {/* End candidate-info */}
-              <div className="option-box1">
-                <ul className="option-list">
-                  <li onClick={() => { ViewCV(candidate.doc_dwnld_url.slice(14, -2)) }}>
-                    <button data-text="View/Download CV">
-                      <span className="la la-file-download"></span>
-                    </button>
-                  </li>
-                  <li onClick={() => { Qualified(candidate.application_id, candidate.status) }} >
-                    <button data-text="Qualified">
-                      <span className="la la-check"></span>
-                    </button>
-                  </li>
-                  <li onClick={() => { NotQualified(candidate.application_id, candidate.status) }} >
-                    <button data-text="Not Qualified">
-                      <span className="la la-times-circle"></span>
-                    </button>
-                  </li>
-                  <li onClick={() => { ResetStatus(candidate.application_id, candidate.status) }} >
-                    <button data-text="Reset Status">
-                      <span className="la la-undo-alt"></span>
-                    </button>
-                  </li>
-                </ul>
-              </div>
             </div>
 
 

@@ -9,8 +9,15 @@ import Router, { useRouter } from "next/router";
 
 const MobileMenu = () => {
     const user = useSelector((state) => state.candidate.user);
-    //console.log("user",user);
+    //console.log("header user",user);
     const showLoginButton = useMemo(() => !user?.id, [user]);
+    const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+    let photo_url = '/images/icons/user.svg';
+    if(user.user_photo != null){
+        photo_url = cloudPath+user.user_photo;
+    } else if(user.photo_url != null){
+        photo_url = user.photo_url;
+    }
     const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
 
     const fetchUserUnreadMessages = async () => {
@@ -23,7 +30,8 @@ const MobileMenu = () => {
             .select('*', { count: 'exact', head: true })
             .is('seen_time', null)
             .eq('to_user_id', user.id);
-
+            //console.log("To User",user.id);
+            //console.log("fetchToData",fetchToData);
         // const fetchFromData = await supabase
         //     .from('messages')
         //     .select('*', { count: 'exact', head: true })
@@ -65,7 +73,7 @@ const MobileMenu = () => {
                         <div className="logo-box">
                             <div className="logo">
                                 <Link href="/">
-                                    <img src="/images/logo.svg" alt="brand" />
+                                    <img src='/images/logo.svg' alt="brand" />
                                 </Link>
                             </div>
                         </div>
@@ -118,9 +126,9 @@ const MobileMenu = () => {
                                 <Image
                                     alt="avatar"
                                     className="thumb"
-                                    src="/images/icons/user.svg"
-                                    width={15}
-                                    height={15}
+                                    src={photo_url}
+                                    width={35}
+                                    height={35}
                                     style={{ marginTop: '-5px' }}
                                 />
                                 <span
