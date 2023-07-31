@@ -28,6 +28,13 @@ module.exports = [
         active: "",
     },
     {
+      id: 7,
+      name: "Post a Job",
+      icon: "la-briefcase",
+      routePath: "/employers-dashboard/post-jobs",
+      active: "",
+  },
+    {
         id: 5,
         name: "All Applicants",
         icon: "la-file-invoice",

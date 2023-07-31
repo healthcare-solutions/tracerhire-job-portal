@@ -48,68 +48,113 @@ const ChatBox = () => {
   //   return unique;
   // }
 
-  const getDistApplicants = async (showLoading) => {
-    //await supabase.from('messages').update({seen_time: null});
-
-    // let { data, error } = await supabase.from('applications').select('user_id');
-    // let res = await removeDuplicateObjects(data, 'user_id');
-    // if(res){
-    //     let { data2, error } = await supabase.from('users').select('user_id').contains("user_id", res);
-    //     console.log("data2",data2);
-    // }
-    if (showLoading) {
-      setIsLoadingLeft(true);
-    }
-
-    const fetchUser = await supabase
-      .from('users')
-      .select()
-      .ilike('role', 'CANDIDATE')
-      .order('user_id', { ascending: true })
-      .limit(100);
-    if (fetchUser) {
-      let allUserData = fetchUser.data;
-      let arrData = [];
-      if (allUserData) {
-        for (const element of allUserData) {
-          // const fetchOneDataUser = await supabase
-          // .from('messages')
-          // .select('from_user_id','to_user_id')
-          // .is('seen_time', null)
-          // .eq('from_user_id', element.user_id);
-          // console.log("fetchOneDataUser",fetchOneDataUser);
-          //console.log("element",element);
-          let photo_url = '/images/resource/candidate-1.png';
-          if (element.user_photo != null) {
-            photo_url = cloudPath + element.user_photo;
-          } else if (element.photo_url != null) {
-            photo_url = element.photo_url;
+  const getDistApplicants = async (showLoading, selected_user_id = 0) => {
+    if(selected_user_id > 0){
+      const fetchUser = await supabase
+        .from('users')
+        .select()
+        .eq('user_id',selected_user_id)
+        .ilike('role', 'CANDIDATE')
+        .order('user_id', { ascending: true })
+        .limit(100);
+      if (fetchUser) {
+        let allUserData = fetchUser.data;
+        let arrData = [];
+        if (allUserData) {
+          for (const element of allUserData) {
+            // const fetchOneDataUser = await supabase
+            // .from('messages')
+            // .select('from_user_id','to_user_id')
+            // .is('seen_time', null)
+            // .eq('from_user_id', element.user_id);
+            // console.log("fetchOneDataUser",fetchOneDataUser);
+            //console.log("element",element);
+            let photo_url = '/images/resource/candidate-1.png';
+            if (element.user_photo != null) {
+              photo_url = cloudPath + element.user_photo;
+            } else if (element.photo_url != null) {
+              photo_url = element.photo_url;
+            }
+            //console.log("photo_url",photo_url);
+            const fetchOneData = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .is('seen_time', null)
+              .eq('from_user_id', element.user_id);
+            let objData = {
+              user_id: element.user_id,
+              created_at: element.created_at,
+              email: element.email,
+              name: element.name,
+              phone_number: element.phone_number,
+              photo_url: photo_url,
+              count: fetchOneData.count
+            }
+            //console.log("objData",objData);
+            //console.log("from_user_id",element.user_id,"Count",fetchOneData.count);
+            arrData.push(objData);
           }
-          //console.log("photo_url",photo_url);
-          const fetchOneData = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .is('seen_time', null)
-            .eq('from_user_id', element.user_id);
-          let objData = {
-            user_id: element.user_id,
-            created_at: element.created_at,
-            email: element.email,
-            name: element.name,
-            phone_number: element.phone_number,
-            photo_url: photo_url,
-            count: fetchOneData.count
-          }
-          //console.log("objData",objData);
-          //console.log("from_user_id",element.user_id,"Count",fetchOneData.count);
-          arrData.push(objData);
+        }
+        if (arrData) {
+          setUserData(arrData);
+          setIsLoadingLeft(false);
         }
       }
-      if (arrData) {
-        setUserData(arrData);
-        setIsLoadingLeft(false);
+    } else {
+      if (showLoading) {
+        setIsLoadingLeft(true);
+      }
+      const fetchUser = await supabase
+        .from('users')
+        .select()
+        .ilike('role', 'CANDIDATE')
+        .order('user_id', { ascending: true })
+        .limit(100);
+      if (fetchUser) {
+        let allUserData = fetchUser.data;
+        let arrData = [];
+        if (allUserData) {
+          for (const element of allUserData) {
+            // const fetchOneDataUser = await supabase
+            // .from('messages')
+            // .select('from_user_id','to_user_id')
+            // .is('seen_time', null)
+            // .eq('from_user_id', element.user_id);
+            // console.log("fetchOneDataUser",fetchOneDataUser);
+            //console.log("element",element);
+            let photo_url = '/images/resource/candidate-1.png';
+            if (element.user_photo != null) {
+              photo_url = cloudPath + element.user_photo;
+            } else if (element.photo_url != null) {
+              photo_url = element.photo_url;
+            }
+            //console.log("photo_url",photo_url);
+            const fetchOneData = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .is('seen_time', null)
+              .eq('from_user_id', element.user_id);
+            let objData = {
+              user_id: element.user_id,
+              created_at: element.created_at,
+              email: element.email,
+              name: element.name,
+              phone_number: element.phone_number,
+              photo_url: photo_url,
+              count: fetchOneData.count
+            }
+            //console.log("objData",objData);
+            //console.log("from_user_id",element.user_id,"Count",fetchOneData.count);
+            arrData.push(objData);
+          }
+        }
+        if (arrData) {
+          setUserData(arrData);
+          setIsLoadingLeft(false);
+        }
       }
     }
+    
   }
 
   useEffect(() => {
@@ -189,6 +234,9 @@ const ChatBox = () => {
         //container.scrollTop = element.offsetTop;
         document.getElementById('msg_card_body').scroll({ top: 7000, behavior: 'smooth' });
       }, 1000);
+      setInterval(function() {
+        getDistApplicants(true,fetchUser.data[0].user_id);
+      }, 30000);
     }
   }
 

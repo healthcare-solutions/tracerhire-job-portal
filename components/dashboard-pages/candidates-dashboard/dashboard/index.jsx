@@ -10,10 +10,12 @@ import { useSelector } from "react-redux";
 import JobApplied from "./components/JobApplied";
 import DashboardCandidatesHeader from "../../../header/DashboardCandidatesHeader";
 import MenuToggler from "../../MenuToggler";
+import Link from "next/link";
 
 const Index = () => {
   const user = useSelector(state => state.candidate.user);
-  let userName = "Howdy, "+user.name+" !";
+  //let userName = "Welcome, "+user.name+" !";
+  let userName = "Dashboard!";
   return (
     <div className="page-wrapper dashboard">
       <span className="header-span"></span>
@@ -60,6 +62,9 @@ const Index = () => {
               <div className="notification-widget ls-widget">
                 <div className="widget-title">
                   <h4>Notifications</h4>
+                  <Link href={`/candidates-dashboard/job-alerts`}>
+                  View All
+                  </Link>
                 </div>
                 <div className="widget-content">
                   <Notification />

@@ -14,7 +14,7 @@ const Applicants = () => {
   const userId = user.id
   const router = useRouter();
 
-  const [rpp, setRpp] = useState(200);
+  const [rpp, setRpp] = useState(20);
   const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
   const [arrPages, setArrPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -411,9 +411,22 @@ const Applicants = () => {
 
             {
               arrPages.map(item => {
-                return (
-                  <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
-                )
+                if(arrPages.length > 6){
+                  let nextThreePages = item - 4;
+                  let prevThreePages = item + 4;
+                  if(currentPage > nextThreePages){
+                    if(currentPage < prevThreePages){
+                    return (
+                      <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                    )
+                    }
+                  }
+                } else{
+                  return (
+                    <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                  )
+                }
+                
               })
             }
 

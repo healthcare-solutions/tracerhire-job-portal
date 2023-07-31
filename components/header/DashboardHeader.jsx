@@ -29,7 +29,14 @@ const DashboardHeader = () => {
   }, []);
 
   const user = useSelector(state => state.candidate.user)
-  const menuOptions = user.role !== 'CANDIDATE' ?  employerMenuData : candidatesMenuData
+  const menuOptions = user.role !== 'CANDIDATE' ?  employerMenuData : candidatesMenuData;
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+    let photo_url = '/images/icons/user.svg';
+    if(user.user_photo != null){
+        photo_url = cloudPath+user.user_photo;
+    } else if(user.photo_url != null){
+        photo_url = user.photo_url;
+    }
 
   return (
     // <!-- Main Header-->
@@ -84,7 +91,7 @@ const DashboardHeader = () => {
                 <Image
                   alt="avatar"
                   className="thumb"
-                  src="/images/icons/user.svg"
+                  src={photo_url}
                   width={20}
                   height={20}
                 />

@@ -21,7 +21,7 @@ const FeaturedBlock3 = () => {
     .from('jobs')
     .select("*")
     .order('created_at', { ascending: false })
-    .range(0, 12);
+    .range(0, 8);
     if(fetch_cities.data){
       const unique = fetch_cities.data.filter(
         (obj, index) =>

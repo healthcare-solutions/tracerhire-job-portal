@@ -28,7 +28,7 @@ const Applicants = () => {
       //.not('status',"eq",'Qualified');
       //.is('deleted', null)
       .order('created_at', { ascending: false })
-      .range(0, 10);
+      .range(0, 7);
     if (dataRecentApplicants) {
 
       // Make Record Unique Start //

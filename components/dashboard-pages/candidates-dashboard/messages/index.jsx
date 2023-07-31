@@ -35,50 +35,95 @@ const Index = () => {
   const [chatUserId, setChatUserId] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
 
-  const getDistApplicants = async (showLoading) => {
-    if(showLoading){
-      setIsLoadingLeft(true);
-    }
-    const fetchUser = await supabase
-      .from('users')
-      .select()
-      .ilike('role', 'ADMIN')
-      .order('user_id', { ascending: true })
-      .limit(100);
-    if (fetchUser) {
-      let allUserData = fetchUser.data;
-      let arrData = [];
-      if(allUserData){
-        for (const element of allUserData) {
-          const fetchOneData = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .is('seen_time', null)
-          .eq('to_user_id', user.id)
-          .eq('from_user_id', element.user_id);
-          let photo_url = '/images/resource/candidate-1.png';
-          if(element.user_photo != null){
-            photo_url = cloudPath+element.user_photo;
-          } else if(element.photo_url != null){
-            photo_url = element.photo_url;
+  const getDistApplicants = async (showLoading, selected_user_id = 0) => {
+    if(selected_user_id > 0){
+      const fetchUser = await supabase
+        .from('users')
+        .select()
+        .eq('user_id',selected_user_id)
+        .ilike('role', 'ADMIN')
+        .order('user_id', { ascending: true })
+        .limit(100);
+      if (fetchUser) {
+        let allUserData = fetchUser.data;
+        let arrData = [];
+        if(allUserData){
+          for (const element of allUserData) {
+            const fetchOneData = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .is('seen_time', null)
+            .eq('to_user_id', user.id)
+            .eq('from_user_id', element.user_id);
+            let photo_url = '/images/resource/candidate-1.png';
+            if(element.user_photo != null){
+              photo_url = cloudPath+element.user_photo;
+            } else if(element.photo_url != null){
+              photo_url = element.photo_url;
+            }
+            let objData = {
+              user_id: element.user_id,
+              created_at: element.created_at,
+              email: element.email,
+              name: element.name,
+              phone_number: element.phone_number,
+              photo_url: photo_url,
+              count : fetchOneData.count
+            }
+            arrData.push(objData);
           }
-          let objData = {
-            user_id: element.user_id,
-            created_at: element.created_at,
-            email: element.email,
-            name: element.name,
-            phone_number: element.phone_number,
-            photo_url: photo_url,
-            count : fetchOneData.count
-          }
-          arrData.push(objData);
+        }
+        if(arrData){
+          setUserData(arrData);
+          setIsLoadingLeft(false);
         }
       }
-      if(arrData){
-        setUserData(arrData);
-        setIsLoadingLeft(false);
+    } else {
+      if(showLoading){
+        setIsLoadingLeft(true);
+      }
+      const fetchUser = await supabase
+        .from('users')
+        .select()
+        .ilike('role', 'ADMIN')
+        .order('user_id', { ascending: true })
+        .limit(100);
+      if (fetchUser) {
+        let allUserData = fetchUser.data;
+        let arrData = [];
+        if(allUserData){
+          for (const element of allUserData) {
+            const fetchOneData = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .is('seen_time', null)
+            .eq('to_user_id', user.id)
+            .eq('from_user_id', element.user_id);
+            let photo_url = '/images/resource/candidate-1.png';
+            if(element.user_photo != null){
+              photo_url = cloudPath+element.user_photo;
+            } else if(element.photo_url != null){
+              photo_url = element.photo_url;
+            }
+            let objData = {
+              user_id: element.user_id,
+              created_at: element.created_at,
+              email: element.email,
+              name: element.name,
+              phone_number: element.phone_number,
+              photo_url: photo_url,
+              count : fetchOneData.count
+            }
+            arrData.push(objData);
+          }
+        }
+        if(arrData){
+          setUserData(arrData);
+          setIsLoadingLeft(false);
+        }
       }
     }
+    
   }
 
   useEffect(() => {
@@ -156,6 +201,9 @@ const Index = () => {
         // container.scrollTop = element.offsetTop;
         document.getElementById('msg_card_body').scroll({ top: 7000, behavior: 'smooth' });
       }, 1000);
+      setInterval(function() {
+        getDistApplicants(true,fetchUser.data[0].user_id);
+      }, 30000);
     }
   }
 

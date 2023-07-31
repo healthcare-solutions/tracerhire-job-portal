@@ -5,6 +5,7 @@ import candidatesMenuData from "../../data/candidatesMenuData";
 import HeaderNavContent from "./HeaderNavContent";
 import { isActiveLink } from "../../utils/linkActiveChecker";
 import { useRouter } from "next/router";
+import { useSelector, useDispatch } from "react-redux";
 
 const DashboardCandidatesHeader = () => {
   const [navbar, setNavbar] = useState(false);
@@ -22,6 +23,14 @@ const DashboardCandidatesHeader = () => {
   useEffect(() => {
     window.addEventListener("scroll", changeBackground);
   }, []);
+  const user = useSelector(state => state.candidate.user);
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+    let photo_url = '/images/icons/user.svg';
+    if(user.user_photo != null){
+        photo_url = cloudPath+user.user_photo;
+    } else if(user.photo_url != null){
+        photo_url = user.photo_url;
+    }
 
   return (
     // <!-- Main Header-->
@@ -75,11 +84,11 @@ const DashboardCandidatesHeader = () => {
                 <Image
                   alt="avatar"
                   className="thumb"
-                  src="/images/resource/candidate-1.png"
+                  src={photo_url}
                   width={50}
                   height={50}
                 />
-                <span className="name">My Account</span>
+                <span className="name">Hello { user.name }</span>
               </a>
 
               <ul className="dropdown-menu">

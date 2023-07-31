@@ -6,6 +6,8 @@ import { supabase } from "../../config/supabaseClient";
 import LoginPopup from "../../components/common/form/login/LoginPopup";
 import FooterDefault from "../../components/footer/common-footer";
 import DefaulHeader from "../../components/header/DefaulHeader";
+// import DashboardHeader from "../../../header/DashboardHeader";
+import DashboardHeader from "../../components/header/DashboardHeader";
 import MobileMenu from "../../components/header/MobileMenu";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -118,7 +120,7 @@ const CandidateSingleDynamicV1 = () => {
       <LoginPopup />
       {/* End Login Popup Modal */}
 
-      <DefaulHeader />
+      <DashboardHeader />
       {/* <!--End Main Header --> */}
 
       <MobileMenu />

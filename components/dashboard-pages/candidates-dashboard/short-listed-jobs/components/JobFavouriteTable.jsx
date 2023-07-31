@@ -263,11 +263,24 @@ const JobFavouriteTable = () => {
                                 }
 
                                 {
-                                    arrPages.map(item => {
+                                  arrPages.map(item => {
+                                    if(arrPages.length > 6){
+                                      let nextThreePages = item - 4;
+                                      let prevThreePages = item + 4;
+                                      if(currentPage > nextThreePages){
+                                        if(currentPage < prevThreePages){
                                         return (
-                                            <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                                          <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
                                         )
-                                    })
+                                        }
+                                      }
+                                    } else{
+                                      return (
+                                        <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                                      )
+                                    }
+                                    
+                                  })
                                 }
 
                                 {

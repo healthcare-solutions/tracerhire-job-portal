@@ -272,7 +272,7 @@ const ContactInfoBox = () => {
                         name="name"
                         value={companyAddress1}
                         onChange={(e) => {setCompanyAddress1(e.target.value)}}
-                        placeholder="329 Queensberry Street, North Melbourne VIC 3051, Australia."
+                        placeholder="Richmond, VA, USA"
                         required
                     />
                 </div>
@@ -312,7 +312,7 @@ const ContactInfoBox = () => {
                         ref={searchInput}
                         value={companyFindOnMap}
                         onChange={(e) => {setCompanyFindOnMap(e.target.value)}}
-                        placeholder="329 Queensberry Street, North Melbourne VIC 3051, Australia."
+                        placeholder="Richmond, VA, USA"
                         required
                     />
                 </div>

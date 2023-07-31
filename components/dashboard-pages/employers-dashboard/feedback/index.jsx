@@ -1,10 +1,10 @@
 import MobileMenu from "../../../header/MobileMenu";
 import LoginPopup from "../../../common/form/login/LoginPopup";
-import DashboardCandidatesSidebar from "../../../header/DashboardCandidatesSidebar";
+import DashboardHeader from "../../../header/DashboardHeader";
 import BreadCrumb from "../../BreadCrumb";
 import CopyrightFooter from "../../CopyrightFooter";
 import PackageDataTable from "./components/PackageDataTable";
-import DashboardCandidatesHeader from "../../../header/DashboardCandidatesHeader";
+import DashboardEmployerSidebar from "../../../header/DashboardEmployerSidebar";
 import MenuToggler from "../../MenuToggler";
 
 const index = () => {
@@ -16,13 +16,13 @@ const index = () => {
       <LoginPopup />
       {/* End Login Popup Modal */}
 
-      <DashboardCandidatesHeader />
+      <DashboardHeader />
       {/* End Header */}
 
       <MobileMenu />
       {/* End MobileMenu */}
 
-      <DashboardCandidatesSidebar />
+      <DashboardEmployerSidebar />
       {/* <!-- End Candidates Sidebar Menu --> */}
 
       {/* <!-- Dashboard --> */}

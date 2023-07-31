@@ -7,6 +7,11 @@ const Testimonial4 = () => {
   const [arrData, setArrData] = useState([]);
   const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
 
+  
+  //console.log("arrData start :");
+  //console.log(arrData);
+  //console.log("arrData end :");
+
   useEffect(() => {
     fetchFeedback();
   }, []);
