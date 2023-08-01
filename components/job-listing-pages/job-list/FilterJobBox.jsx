@@ -186,7 +186,7 @@ const FilterJobBox = () => {
     // ?.sort(sortFilter)
     // .slice(perPage.start, perPage.end !== 0 ? perPage.end : 16)
     ?.map((item) => (
-      <div className="job-block col-lg-6 col-md-12 col-sm-12" key={item.job_id}>
+      <div className="job-block col-lg-6 col-md-12 col-sm-12 45" key={item.job_id}>
         <div className="inner-box">
 {/*
           <div className="content">
@@ -471,6 +471,22 @@ const FilterJobBox = () => {
               })}
             >
               30 per page
+            </option>
+            <option
+              value={JSON.stringify({
+                start: 0,
+                end: 50,
+              })}
+            >
+              50 per page
+            </option>
+            <option
+              value={JSON.stringify({
+                start: 0,
+                end: 100,
+              })}
+            >
+              100 per page
             </option>
           </select>
           {/* End select */}

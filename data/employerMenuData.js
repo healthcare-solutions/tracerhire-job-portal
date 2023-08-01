@@ -1,11 +1,11 @@
 module.exports = [
-    // {
-    //   id: 1,
-    //   name: "Dashboard",
-    //   icon: "la-home",
-    //   routePath: "/employers-dashboard/dashboard",
-    //   active: "active",
-    // },
+    {
+      id: 1,
+      name: "Dashboard",
+      icon: "la-home",
+      routePath: "/employers-dashboard/dashboard",
+      active: "active",
+    },
     {
       id: 2,
       name: "Company Profile",
@@ -28,6 +28,13 @@ module.exports = [
         active: "",
     },
     {
+      id: 7,
+      name: "Post a Job",
+      icon: "la-briefcase",
+      routePath: "/employers-dashboard/post-jobs",
+      active: "",
+  },
+    {
         id: 5,
         name: "All Applicants",
         icon: "la-file-invoice",
@@ -42,13 +49,13 @@ module.exports = [
     //   routePath: "/employers-dashboard/packages",
     //   active: "",
     // },
-    // {
-    //   id: 8,
-    //   name: "Messages",
-    //   icon: "la-comment-o",
-    //   routePath: "/employers-dashboard/messages",
-    //   active: "",
-    // },
+    {
+      id: 8,
+      name: "Messages",
+      icon: "la-comment-o",
+      routePath: "/employers-dashboard/messages",
+      active: "",
+    },
     {
       id: 9,
       name: "Resume Alerts",
@@ -56,13 +63,20 @@ module.exports = [
       routePath: "/employers-dashboard/resume-alerts",
       active: "",
     },
-    // {
-    //   id: 6,
-    //   name: "Candidate Lists",
-    //   icon: "la-bookmark-o",
-    //   routePath: "/employers-dashboard/shortlisted-resumes",
-    //   active: "",
-    // },
+    {
+      id: 6,
+      name: "Candidate Lists",
+      icon: "la-bookmark-o",
+      routePath: "/employers-dashboard/shortlisted-resumes",
+      active: "",
+    },
+    {
+      id: 7,
+      name: "Feedback",
+      icon: "la la-comment-dots",
+      routePath: "/employers-dashboard/feedback",
+      active: "",
+    },
     // {
     //   id: 10,
     //   name: "Change Password",

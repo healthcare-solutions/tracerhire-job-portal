@@ -4,30 +4,24 @@ const CompanyInfo = ({ company }) => {
   return (
     <ul className="company-info">
       <li>
-        Primary industry: <span>Software</span>
+        Company size: <span>{company.employee_size}</span>
       </li>
       <li>
-        Company size: <span>501-1,000</span>
-      </li>
-      <li>
-        Founded in: <span>2011</span>
-      </li>
-      <li>
-        Phone: <span>123 456 7890</span>
-      </li>
-      <li>
-        Email: <span>{company.email}</span>
+        Founded in: <span>{company.company_since}</span>
       </li>
       <li>
         Location:{" "}
         <span>
-          {company.city}, {company.country}
+          {company.city}, {company.st_cd}
         </span>
       </li>
-      <li>
+      {
+        company.facebook_url != null || company.linkedin_url != null && <li>
         Social media:
-        <Social />
+        <Social company={company} />
       </li>
+      }
+      
     </ul>
   );
 };

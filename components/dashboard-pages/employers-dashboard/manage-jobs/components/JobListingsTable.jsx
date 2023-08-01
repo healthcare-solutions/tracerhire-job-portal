@@ -1,7 +1,8 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+//import Router from "next/router";
+import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { db } from "../../../../common/form/firebase";
 // import jobs from "../../../../../data/job-featured.js";
@@ -18,9 +19,10 @@ const JobListingsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  //const [jobStatus, setJobStatus] = useState('');
+  const [jobStatus, setJobStatus] = useState('');
   const user = useSelector(state => state.candidate.user)
   const router = useRouter();
+  const inputRef = useRef(null);
 
   // const fetchPost = async () => {
   //   const userJoblistQuery  = query(collection(db, "jobs"), where("user", "==", user.id))
@@ -112,10 +114,48 @@ const JobListingsTable = () => {
     }
   }
 
+  const fetchAllPost = async (pageNo) => {
+      setIsLoading(true);
+      let countTotalRecords = await supabase
+      .from('manage_jobs_view')
+      .select('*', { count: 'exact', head: true });
+      //.eq('user_id', user.id);
+      let totalRecords = countTotalRecords.count;
+      let recordPerPage = rpp;
+      let totalPages = Math.ceil(totalRecords / recordPerPage);
+      setTotalPages(totalPages);
+      if (totalPages) {
+        let arrPage = [];
+        for (var i = 1; i <= totalPages; i++) {
+          arrPage.push(i);
+        }
+        setArrPages(arrPage);
+
+        let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
+        if (pageNo < 1) {
+          start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
+        }
+        let end_limit = parseInt(start_limit) + parseInt(rpp);
+        setCurrentPage(pageNo);
+
+        let { data, error } = await supabase
+          .from('manage_jobs_view')
+          .select()
+          //.eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .range(start_limit, end_limit);
+
+        data.forEach(job => job.created_at = dateFormat(job.created_at))
+        setjobs(data);   
+      }
+      setIsLoading(false);
+};
+
   // clear all filters
   const clearAll = () => {
-    setSearchField('');
-    fetchPost(currentPage)
+      setSearchField('');
+      setJobStatus('');
+      fetchAllPost(currentPage);
   };
 
   const handleAddNew = () => {
@@ -128,6 +168,7 @@ const JobListingsTable = () => {
     let { data, error } = await supabase
       .from('manage_jobs_view')
       .select()
+      //.eq('user_id', user.id)
       .order('created_at', { ascending: false });
     data.forEach(job => job.created_at = dateFormat(job.created_at))
     setjobs(data)
@@ -138,46 +179,159 @@ const JobListingsTable = () => {
   // Initial Function
   const fetchPost = async (pageNo) => {
     setIsLoading(true);
-    let countTotalRecords = await supabase
+    if (searchField != '' && jobStatus != '') {
+      let countTotalRecords = await supabase
+      .from('manage_jobs_view')
+      .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
+      .ilike('job_title', '%' + searchField + '%')
+      .eq('status', jobStatus);
+      //.eq('user_id', user.id);
+      let totalRecords = countTotalRecords.count;
+      let recordPerPage = rpp;
+      let totalPages = Math.ceil(totalRecords / recordPerPage);
+      setTotalPages(totalPages);
+      //if (totalPages) {
+        let arrPage = [];
+        for (var i = 1; i <= totalPages; i++) {
+          arrPage.push(i);
+        }
+        setArrPages(arrPage);
+
+        let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
+        if (pageNo < 1) {
+          start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
+        }
+        let end_limit = parseInt(start_limit) + parseInt(rpp);
+        setCurrentPage(pageNo);
+
+        let { data, error } = await supabase
+          .from('manage_jobs_view')
+          .select()
+          //.eq('user_id', user.id)
+          .ilike('job_title', '%' + searchField + '%')
+          .eq('status', jobStatus)
+          .order('created_at', { ascending: false })
+          .range(start_limit, end_limit);
+
+        data.forEach(job => job.created_at = dateFormat(job.created_at))
+        setjobs(data);  
+      //}
+      setIsLoading(false);
+
+    } else if (searchField != '') {
+      let countTotalRecords = await supabase
+      .from('manage_jobs_view')
+      .select('*', { count: 'exact', head: true }).eq('status', jobStatus)
+      .ilike('job_title', '%' + searchField + '%');
+      //.eq('user_id', user.id);
+      let totalRecords = countTotalRecords.count;
+      let recordPerPage = rpp;
+      let totalPages = Math.ceil(totalRecords / recordPerPage);
+      setTotalPages(totalPages);
+      //if (totalPages) {
+        let arrPage = [];
+        for (var i = 1; i <= totalPages; i++) {
+          arrPage.push(i);
+        }
+        setArrPages(arrPage);
+
+        let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
+        if (pageNo < 1) {
+          start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
+        }
+        let end_limit = parseInt(start_limit) + parseInt(rpp);
+        setCurrentPage(pageNo);
+
+        let { data, error } = await supabase
+          .from('manage_jobs_view')
+          .select()
+          //.eq('user_id', user.id)
+          .ilike('job_title', '%' + searchField + '%')
+          .order('created_at', { ascending: false })
+          .range(start_limit, end_limit);
+
+        data.forEach(job => job.created_at = dateFormat(job.created_at))
+        setjobs(data);
+      //}
+      setIsLoading(false);
+
+    } else if (jobStatus != '') {
+      let countTotalRecords = await supabase
+      .from('manage_jobs_view')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', jobStatus);
+      //.eq('user_id', user.id);
+      let totalRecords = countTotalRecords.count;
+      let recordPerPage = rpp;
+      let totalPages = Math.ceil(totalRecords / recordPerPage);
+      setTotalPages(totalPages);
+      //if (totalPages) {
+        let arrPage = [];
+        for (var i = 1; i <= totalPages; i++) {
+          arrPage.push(i);
+        }
+        setArrPages(arrPage);
+
+        let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
+        if (pageNo < 1) {
+          start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
+        }
+        let end_limit = parseInt(start_limit) + parseInt(rpp);
+        setCurrentPage(pageNo);
+        let { data, error } = await supabase
+          .from('manage_jobs_view')
+          .select()
+          //.eq('user_id', user.id)
+          .eq('status', jobStatus)
+          .order('created_at', { ascending: false })
+          .range(start_limit, end_limit);
+
+        data.forEach(job => job.created_at = dateFormat(job.created_at))
+        setjobs(data);  
+      //}
+      setIsLoading(false);
+
+    } else {
+      let countTotalRecords = await supabase
       .from('manage_jobs_view')
       .select('*', { count: 'exact', head: true });
-    let totalRecords = countTotalRecords.count;
-    let recordPerPage = rpp;
-    let totalPages = Math.ceil(totalRecords / recordPerPage);
-    setTotalPages(totalPages);
-    if (totalPages) {
-      let arrPage = [];
-      for (var i = 1; i <= totalPages; i++) {
-        arrPage.push(i);
+      //.eq('user_id', user.id);
+      let totalRecords = countTotalRecords.count;
+      let recordPerPage = rpp;
+      let totalPages = Math.ceil(totalRecords / recordPerPage);
+      setTotalPages(totalPages);
+      if (totalPages) {
+        let arrPage = [];
+        for (var i = 1; i <= totalPages; i++) {
+          arrPage.push(i);
+        }
+        setArrPages(arrPage);
+
+        let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
+        if (pageNo < 1) {
+          start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
+        }
+        let end_limit = parseInt(start_limit) + parseInt(rpp);
+        setCurrentPage(pageNo);
+
+        let { data, error } = await supabase
+          .from('manage_jobs_view')
+          .select()
+          //.eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .range(start_limit, end_limit);
+
+        data.forEach(job => job.created_at = dateFormat(job.created_at))
+        setjobs(data);   
       }
-      setArrPages(arrPage);
-
-      let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
-      if (pageNo < 1) {
-        start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
-      }
-      let end_limit = parseInt(start_limit) + parseInt(rpp);
-      console.log("start_limit", start_limit, "end_limit", end_limit);
-      setCurrentPage(pageNo);
-
-      let { data, error } = await supabase
-        .from('manage_jobs_view')
-        .select()
-        .order('created_at', { ascending: false })
-        .range(start_limit, end_limit);
-
-      data.forEach(job => job.created_at = dateFormat(job.created_at))
-      setjobs(data);
-      
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   const handleNextPage = (pageNo) => {
     setIsLoading(true);
     fetchPost(pageNo);
   }
-
 
   useEffect(() => {
     setIsLoading(true);
@@ -227,20 +381,21 @@ const JobListingsTable = () => {
               }}
               style={{ minWidth: '450px' }}
             />
-            {/*           
+                      
           <select
             className="chosen-single form-select chosen-container mx-3"
+            value={jobStatus}
             onChange={(e) => {
               setJobStatus(e.target.value)
             }}
           >
-            <option>Status</option>
-            <option>Published</option>
-            <option>Unpublished</option>
-          </select> */}
+            <option value="">Status</option>
+            <option value="Published">Published</option>
+            <option value="Unpublished">Unpublished</option>
+          </select>
 
             <button
-              onClick={findJob}
+              onClick={() => {fetchPost(1)}}
               className="btn btn-primary text-nowrap m-1"
               style={{ minHeight: '43px' }}
             >
@@ -248,6 +403,7 @@ const JobListingsTable = () => {
             </button>
             <button
               onClick={clearAll}
+              ref={inputRef}
               className="btn btn-danger text-nowrap m-1"
               style={{ minHeight: '43px' }}
             >
@@ -269,7 +425,7 @@ const JobListingsTable = () => {
       {/* Start table widget content */}
       
         <div className="widget-content">
-        {isLoading == false && jobs.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom: 40 }}><center>You have not posted any jobs yet! </center></p> 
+        {isLoading == false && jobs.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom: 40 }}><center>No Jobs Found! </center></p> 
             :
           <div className="table-outer">
             <table className="default-table manage-job-table">
@@ -388,9 +544,22 @@ const JobListingsTable = () => {
 
                       {
                         arrPages.map(item => {
-                          return (
-                            <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
-                          )
+                          if(arrPages.length > 6){
+                            let nextThreePages = item - 4;
+                            let prevThreePages = item + 4;
+                            if(currentPage > nextThreePages){
+                              if(currentPage < prevThreePages){
+                              return (
+                                <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                              )
+                              }
+                            }
+                          } else{
+                            return (
+                              <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                            )
+                          }
+                          
                         })
                       }
 
@@ -401,18 +570,14 @@ const JobListingsTable = () => {
                           </a>
                         </li>
                       }
-
                     </ul>
                   </nav>
                 }
-
-
               </tbody>
             </table>
           </div>
           }
         </div>
-      
       {/* End table widget content */}
     </div>
   );

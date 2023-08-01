@@ -39,7 +39,7 @@ const index = () => {
               {/* <!-- Ls widget --> */}
               <div className="cv-manager-widget ls-widget">
                 <div className="widget-title">
-                  <h4>Cv Manager</h4>
+                  <h4>CV Manager</h4>
                 </div>
                 {/* End widget-title */}
                 <div className="widget-content">

@@ -39,7 +39,7 @@ const AlertDataTable = () => {
         .from('notification')
         .select()
         .like('notification_text', '%' + newKeyword + '%')
-        .eq('user_id', user.id)
+        //.eq('user_id', user.id)
         .is('deleted', null)
         //.not('status',"eq",'Qualified');
         .order('created_at', { ascending: false })
@@ -54,7 +54,7 @@ const AlertDataTable = () => {
       let countTotalRecords = await supabase
         .from('notification')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+        //.eq('user_id', user.id)
         .is('deleted', null);
       let totalRecords = countTotalRecords.count;
       
@@ -80,7 +80,7 @@ const AlertDataTable = () => {
         let { data, error } = await supabase
           .from('notification')
           .select()
-          .eq('user_id', user.id)
+          //.eq('user_id', user.id)
           //.not('status',"eq",'Qualified');
           .is('deleted', null)
           .order('created_at', { ascending: false })
@@ -124,20 +124,7 @@ const AlertDataTable = () => {
   return (
     <div>
 
-      {
-        isLoading ?
-          <div style={{ width: '20%', margin: "auto" }}>
-            <BallTriangle
-              height={100}
-              width={100}
-              radius={5}
-              color="#000"
-              ariaLabel="ball-triangle-loading"
-              wrapperClass={{}}
-              wrapperStyle=""
-              visible={true}
-            />
-          </div> :
+       
           <div>
             <div className="search-box-one">
               <form method="post" action="blog.html">
@@ -173,10 +160,31 @@ const AlertDataTable = () => {
               {/* End thead */}
 
               <tbody>
+              { isLoading &&
+          <tr>
+            <td colspan="4" align="center">
+            <div style={{ width: '100%', margin: "auto" ,textAlign:'center' }}>
+            <BallTriangle
+              height={100}
+              width={100}
+              radius={5}
+              color="#000"
+              ariaLabel="ball-triangle-loading"
+              wrapperClass={{}}
+              wrapperStyle={{justifyContent:'center'}}
+              visible={true}
+            />
+          </div>
+            </td>
+          </tr>
+        }
                 {userData && userData.map((candidate) => (
                   <tr>
                     <td>{candidate.type}</td>
-                    <td>{candidate.notification_text}</td>
+                    <td>
+                    <div dangerouslySetInnerHTML={{ __html: candidate.notification_text}}></div>
+                    
+                    </td>
                     <td>{moment(candidate.created_at).format("MMMM D, YYYY")}</td>
                     <td>
                       <button onClick={() => { handleDeleteNotification(candidate.id) }}>
@@ -188,7 +196,7 @@ const AlertDataTable = () => {
               </tbody>
             </table>
             {
-              userData.length == 0 && <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom: 40, paddingTop: 40, textAlign: 'center' }}><center>No any resume alert  yet!</center></p>
+              isLoading == false && userData.length == 0 && <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom: 40, paddingTop: 40, textAlign: 'center' }}><center>No any resume alert  yet!</center></p>
             }
             {
               userData.length != 0 && arrPages.length > 1 &&
@@ -204,9 +212,22 @@ const AlertDataTable = () => {
 
                   {
                     arrPages.map(item => {
-                      return (
-                        <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
-                      )
+                      if(arrPages.length > 6){
+                        let nextThreePages = item - 4;
+                        let prevThreePages = item + 4;
+                        if(currentPage > nextThreePages){
+                          if(currentPage < prevThreePages){
+                          return (
+                            <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                          )
+                          }
+                        }
+                      } else{
+                        return (
+                          <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                        )
+                      }
+                      
                     })
                   }
 
@@ -221,7 +242,6 @@ const AlertDataTable = () => {
               </nav>
             }
           </div>
-      }
 
     </div>
 

@@ -5,6 +5,21 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { supabase } from '../../../../../config/supabaseClient';
+const apiKey = process.env.NEXT_PUBLIC_JOB_PORTAL_GMAP_API_KEY;
+const mapApiJs = 'https://maps.googleapis.com/maps/api/js';
+
+function loadAsyncScript(src) {
+    return new Promise(resolve => {
+        const script = document.createElement("Script");
+        Object.assign(script, {
+            type: "text/javascript",
+            async: true,
+            src
+        })
+        script.addEventListener("load", () => resolve(script));
+        document.head.appendChild(script);
+    })
+}
 
 const ContactInfoBox = () => {
 
@@ -18,6 +33,80 @@ const ContactInfoBox = () => {
     const [companyFindOnMap, setCompanyFindOnMap] = useState("");
     const [companyLatitude, setCompanyLatitude] = useState("");
     const [companyLongitude, setCompanyLongitude] = useState("");
+
+    const searchInput = useRef(null);
+
+    // init google map script
+    const initMapScript = () => {
+        // if script already loaded
+        if (window.google) {
+            return Promise.resolve();
+        }
+        const src = `${mapApiJs}?key=${apiKey}&libraries=places&v=weekly`;
+        return loadAsyncScript(src);
+    }            
+
+    // do something on address change
+    const onChangeAddress = (autocomplete) => {
+        const location = autocomplete.getPlace();
+        if(location){
+            
+            setTimeout(() => {
+                console.log("Location ==> ",location.address_components);
+                // console.log("City ==> ",location.address_components[0].long_name);
+                // console.log("Address ==> ",location.address_components[1].long_name);
+                // console.log("State ==> ",location.address_components[2].short_name);
+                // console.log("Country ==> ",location.address_components[3].short_name);
+                // console.log("Lo",location.geometry.viewport.Ha.lo);
+                // console.log("Hi",location.geometry.viewport.Va.hi);
+                //setcompanyState(location.address_components[2].long_name);
+                //setCompanyCountry(location.address_components[3].long_name);
+                if(location.address_components && location.address_components !== undefined){
+                    setCompanyCity(location.address_components[0].long_name);
+                    setCompanyAddress1(location.address_components[0].long_name);
+                    if(location.address_components[1].short_name.length == 2){
+                        setcompanyState(location.address_components[2].long_name);
+                    } else {
+                        setCompanyAddress1(location.address_components[1].long_name);
+                    }
+
+                    if(location.address_components[2].short_name == 'US'){
+                        setCompanyCountry(location.address_components[2].short_name);
+                    } else {
+                        setcompanyState(location.address_components[2].long_name);
+                    }
+
+                    if(location.address_components.length == 4){
+                        setCompanyCountry(location.address_components[3].short_name);
+                    }                    
+                    setCompanyLatitude(location.geometry.viewport.Va.hi);
+                    setCompanyLongitude(location.geometry.viewport.Ha.lo);
+                }
+                setCompanyFindOnMap(searchInput.current.value);
+            }, 2000);
+        }
+        
+        // setJobData((previousState) => ({ 
+        // ...previousState,
+        // address: searchInput.current.value
+        // }))
+    }
+
+    // init autocomplete
+    const initAutocomplete = () => {
+            if (!searchInput.current) return;
+            const autocomplete = new window.google.maps.places.Autocomplete(searchInput.current, {
+                types: ['(cities)']
+            }
+        );
+        autocomplete.setFields(["address_component", "geometry"]);
+        autocomplete.addListener("place_changed", () => onChangeAddress(autocomplete))
+    }
+
+    // load map script after mounted
+    useEffect(() => {
+        initMapScript().then(() => initAutocomplete())
+    }, []);
 
     useEffect(() => {
         fetchCustomer(user.id);
@@ -142,11 +231,11 @@ const ContactInfoBox = () => {
                     value={companyCountry}
                     onChange={(e) => {setCompanyCountry(e.target.value)}}
                     required>
-                        <option>Australia</option>
-                        <option>USA</option>
-                        <option>Chaina</option>
-                        <option>Japan</option>
-                        <option>India</option>
+                        <option value="AUS">Australia</option>
+                        <option value="US">USA</option>
+                        <option value="CHN">Chaina</option>
+                        <option value="JPN">Japan</option>
+                        <option value="IN">India</option>
                     </select>
                 </div>
 
@@ -183,7 +272,7 @@ const ContactInfoBox = () => {
                         name="name"
                         value={companyAddress1}
                         onChange={(e) => {setCompanyAddress1(e.target.value)}}
-                        placeholder="329 Queensberry Street, North Melbourne VIC 3051, Australia."
+                        placeholder="Richmond, VA, USA"
                         required
                     />
                 </div>
@@ -220,9 +309,10 @@ const ContactInfoBox = () => {
                     <input
                         type="text"
                         name="name"
+                        ref={searchInput}
                         value={companyFindOnMap}
                         onChange={(e) => {setCompanyFindOnMap(e.target.value)}}
-                        placeholder="329 Queensberry Street, North Melbourne VIC 3051, Australia."
+                        placeholder="Richmond, VA, USA"
                         required
                     />
                 </div>
@@ -254,19 +344,19 @@ const ContactInfoBox = () => {
                 </div>
 
                 {/* <!-- Input --> */}
-                <div className="form-group col-lg-12 col-md-12">
+                {/* <div className="form-group col-lg-12 col-md-12">
                     <button className="theme-btn btn-style-three">
                         Search Location
                     </button>
-                </div>
+                </div> */}
 
-                <div className="form-group col-lg-12 col-md-12">
+                {/* <div className="form-group col-lg-12 col-md-12">
                     <div className="map-outer">
                         <div style={{ height: "420px", width: "100%" }}>
                             <Map />
                         </div>
                     </div>
-                </div>
+                </div> */}
                 {/* End MapBox */}
 
                 {/* <!-- Input --> */}

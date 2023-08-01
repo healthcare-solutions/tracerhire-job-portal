@@ -23,7 +23,7 @@ const InfoBox = () => {
         <div className="info">
           <h4>Customer</h4>
           <h5>John Doe</h5>
-          <p>329 Queensberry Street, North Melbourne VIC 3051, Australia.</p>
+          <p>Richmond, VA, USA</p>
         </div>
       </div>
     </div>

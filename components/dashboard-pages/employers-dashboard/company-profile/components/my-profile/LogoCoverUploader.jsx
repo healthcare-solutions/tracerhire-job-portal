@@ -4,8 +4,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { supabase } from "../../../../../../config/supabaseClient";
 import { useSelector } from "react-redux";
 
-
-
 const LogoCoverUploader = () => {
     const user = useSelector(state => state.candidate.user);
     const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
@@ -110,6 +108,16 @@ const LogoCoverUploader = () => {
                             modified_at: dateFormat()
                         })
                         .eq('cust_dtl_id', data[0].cust_dtl_id);
+                    
+                    const { dataUpdateUser, errorUser } = await supabase
+                    .from('users')
+                    .update({
+                        user_photo: fileTimestamp + '-' + selectedFile.name
+                    })
+                    .eq('user_id', user.id);
+                    //console.log("dataUpdateUser",dataUpdateUser);
+                    //console.log("errorUser",errorUser);
+
                     setLogoFilename(cloudPath + fileTimestamp + '-' + selectedFile.name);
                 }
             }

@@ -1,6 +1,7 @@
 import Map from "../../../Map";
 import Select from "react-select";
 import Router, { useRouter } from "next/router";
+import Link from "next/link";
 import { addDoc, collection, getFirestore } from "firebase/firestore";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
@@ -578,7 +579,7 @@ const PostBoxForm = () => {
           <input
             type="text"
             name="name"
-            placeholder="329 Queensberry Street, North Melbourne VIC 3051, Australia."
+            placeholder="Richmond, VA, USA"
           />
         </div> */}
         {/* <!-- Input --> */}
@@ -613,6 +614,18 @@ const PostBoxForm = () => {
           >
             Post
           </button>
+          {/* <button
+            className="theme-btn btn-style-three pull-right"
+            onClick={(e) => {
+              e.preventDefault();
+              submitJobPost(jobData, setJobData, user);
+            }}
+          >
+            Back
+          </button> */}
+          <Link href="/employers-dashboard/manage-jobs" className="theme-btn btn-style-three pull-right">
+          Back
+          </Link>
         </div>
       </div>
     </form>

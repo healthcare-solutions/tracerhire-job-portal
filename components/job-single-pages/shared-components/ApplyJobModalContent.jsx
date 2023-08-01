@@ -126,6 +126,7 @@ const ApplyJobModalContent = ({ company }) => {
                 cust_id: company.user_id,
                 email: user.email,
                 name: user.name,
+                status: "New",
                 candidate_message: message,
                 license_nbr: licenseNumber,
                 doc_name: selectedFile.name,

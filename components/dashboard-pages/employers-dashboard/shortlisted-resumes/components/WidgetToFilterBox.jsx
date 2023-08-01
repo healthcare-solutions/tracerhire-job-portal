@@ -18,13 +18,13 @@ const WidgetToFilterBox = () => {
       {/* End searchBox one */}
 
       {/* <!--Tabs Box--> */}
-      <select className="chosen-single form-select chosen-container">
+      {/* <select className="chosen-single form-select chosen-container">
         <option>Newest</option>
         <option>Last 12 Months</option>
         <option>Last 16 Months</option>
         <option>Last 24 Months</option>
         <option>Last 5 year</option>
-      </select>
+      </select> */}
     </div>
   );
 };

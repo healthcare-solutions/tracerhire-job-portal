@@ -1,5 +1,6 @@
-const JobSkills = () => {
-  const skills = [
+const JobSkills = (props) => {
+  console.log("props",props.data);
+  let skills = [
     "app",
     "administrative",
     "android",
@@ -7,6 +8,11 @@ const JobSkills = () => {
     "design",
     "react",
   ];
+  if(props.data && props.data !== undefined){
+    let all_skills = props.data;
+    skills = all_skills.split(",");
+  }
+  
   return (
     <ul className="job-skills">
       {skills.map((skill, i) => (

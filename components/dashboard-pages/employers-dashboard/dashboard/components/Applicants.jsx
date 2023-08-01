@@ -1,49 +1,128 @@
 import Link from "next/link";
+import { supabase } from "../../../../../config/supabaseClient";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import moment from 'moment';
+import { BallTriangle } from 'react-loader-spinner'
 import candidatesData from "../../../../../data/candidates";
 
 const Applicants = () => {
+  const [recentApplicants, setRecentApplicants] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const user = useSelector(state => state.candidate.user);
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    let dataRecentApplicants = await supabase
+      .from('applications_view')
+      .select('*')
+      //.eq('user_id', user.id)
+      //.not('status',"eq",'Qualified');
+      //.is('deleted', null)
+      .order('created_at', { ascending: false })
+      .range(0, 7);
+    if (dataRecentApplicants) {
+
+      // Make Record Unique Start //
+      const unique = dataRecentApplicants.data.filter(
+        (obj, index) =>
+        dataRecentApplicants.data.findIndex((item) => item.user_id === obj.user_id) === index
+      );
+      let arrData = [];
+          for (const item of unique) {
+            const fetchUser = await supabase
+            .from('users')
+            .select('user_photo,photo_url')
+            .eq('user_id',item.user_id);
+            if(fetchUser){
+              let photo_url = '/images/resource/candidate-1.png';
+              console.log(fetchUser.data[0]);
+              if(fetchUser.data.length > 0 && fetchUser.data[0].user_photo != null){
+                photo_url = cloudPath+fetchUser.data[0].user_photo;
+              } else if(fetchUser.data.length > 0 && fetchUser.data[0].photo_url != null){
+                photo_url = fetchUser.data[0].photo_url;
+              }
+              let objData = {
+                application_id: item.application_id,
+                created_at: item.created_at,
+                cust_id: item.cust_id,
+                doc_dwnld_url: item.doc_dwnld_url,
+                email: item.email,
+                job_id: item.job_id,
+                job_title: item.job_title,
+                name: item.name,
+                status: item.status,
+                user_id: item.user_id,
+                photo_url : photo_url
+              }
+              arrData.push(objData);
+            }
+          }
+          if(arrData){
+            setRecentApplicants(arrData);
+          } else {
+            setRecentApplicants(unique);
+          }
+      // Make Record Unique Over //
+
+      //setRecentApplicants(unique);
+      setIsLoading(false);
+    }
+  }
+
   return (
     <>
-      {candidatesData.slice(17, 23).map((candidate) => (
+    {recentApplicants && recentApplicants.length == 0 && <div className="text-center">No Applicants Found !</div>}
+      {isLoading == false && recentApplicants && recentApplicants.map((candidate) => (
         <div
-          className="candidate-block-three col-lg-6 col-md-12 col-sm-12"
-          key={candidate.id}
+          className="candidate-block-three col-lg-4 col-md-12 col-sm-12"
+          key={candidate.application_id}
         >
           <div className="inner-box">
             <div className="content">
               <figure className="image">
-                <img src={candidate.avatar} alt="candidates" />
+                {/* <img src={"/images/resource/candidate-1.png"} alt="candidates" /> */}
+                <img src={candidate.photo_url} alt="candidates" />
               </figure>
               <h4 className="name">
-                <Link href={`/candidates-single-v1/${candidate.id}`}>
+                <Link href={`/candidate-details/${candidate.application_id}`}>
                   {candidate.name}
                 </Link>
               </h4>
+              <span className="designation"><small>{candidate.job_title}</small></span>
 
               <ul className="candidate-info">
-                <li className="designation">{candidate.designation}</li>
-                <li>
+                <li className="designation"></li>
+                {/* <li>
                   <span className="icon flaticon-map-locator"></span>{" "}
                   {candidate.location}
                 </li>
                 <li>
                   <span className="icon flaticon-money"></span> $
                   {candidate.hourlyRate} / hour
-                </li>
+                </li> */}
               </ul>
               {/* End candidate-info */}
 
-              <ul className="post-tags">
+              {/* <ul className="post-tags">
                 {candidate.tags.map((val, i) => (
                   <li key={i}>
                     <a href="#">{val}</a>
                   </li>
                 ))}
-              </ul>
+              </ul> */}
             </div>
             {/* End content */}
 
-            <div className="option-box">
+            {/* <div className="option-box">
               <ul className="option-list">
                 <li>
                   <button data-text="View Aplication">
@@ -66,7 +145,7 @@ const Applicants = () => {
                   </button>
                 </li>
               </ul>
-            </div>
+            </div> */}
             {/* End admin options box */}
           </div>
         </div>

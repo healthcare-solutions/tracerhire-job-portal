@@ -122,6 +122,10 @@ export default [
         routePath: "/candidates-single-v1/1",
       },
       {
+        name: "Candidate Details",
+        routePath: "/candidate-details/1",
+      },
+      {
         name: "Candidates Single V2",
         routePath: "/candidates-single-v2/2",
       },

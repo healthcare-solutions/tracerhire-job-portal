@@ -21,7 +21,7 @@ const ApplicantWidgetContentBox = () => {
       try{
         if (id) {
           let { data: allApplicantsView, error } = await supabase
-              .from('applicants_view')
+              .from('applications_view')
               .select("*")
   
               // Filters
@@ -55,7 +55,7 @@ const ApplicantWidgetContentBox = () => {
 
     const ViewCV = async (applicationId) => {
         const { data, error } = await supabase
-              .from('applicants_view')
+              .from('applications_view')
               .select('*')
               .eq('application_id', applicationId)
 
@@ -238,10 +238,9 @@ const ApplicantWidgetContentBox = () => {
                                 <img src={item.logo} alt="logo" />
                                 </span> */}
                                 <h4>
-                                {/* <Link href={`/employers-dashboard/edit-job/${applicant.user_id}`}>
+                                <Link href={`/candidate-details/${applicant.user_id}`}>
                                     {applicant.name}
-                                </Link> */}
-                                {applicant.name}
+                                </Link>
                                 </h4>
                             </div>
                         </div>

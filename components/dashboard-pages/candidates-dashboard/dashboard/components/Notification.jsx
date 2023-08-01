@@ -1,49 +1,57 @@
+import { supabase } from "../../../../../config/supabaseClient";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import moment from 'moment';
+import { BallTriangle } from 'react-loader-spinner';
+
 const Notification = () => {
+
+  const [recentNotifications, setRecentNotifications] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const user = useSelector(state => state.candidate.user);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    let dataNotifications = await supabase
+      .from('notification')
+      .select('notification_text,created_at')
+      .eq('user_id', user.id)
+      //.not('status',"eq",'Qualified');
+      .is('deleted', null)
+      .order('created_at', { ascending: false })
+      .range(0, 3);
+    if (dataNotifications) {
+      setRecentNotifications(dataNotifications.data);
+      setIsLoading(false);
+    }
+  }
+
   return (
     <ul className="notification-list">
-      <li>
-        <span className="icon flaticon-briefcase"></span>
-        <strong>Henry Wilson</strong> applied for a job
-        <span className="colored"> Product Designer</span>
+      {
+        recentNotifications && recentNotifications.length == 0 && 
+        <li>
+        <div className="text-center">No Any Notification Received !</div>
       </li>
-      {/* End li */}
-
-      <li className="success">
+      }
+      {
+        isLoading == false && recentNotifications && recentNotifications.map((item, index) => {
+          return(
+            <li key={index}>
         <span className="icon flaticon-briefcase"></span>
-        <strong>Raul Costa</strong> applied for a job
-        <span className="colored"> Product Manager, Risk</span>
+        <span dangerouslySetInnerHTML={{ __html: item.notification_text}}></span> 
+        <b> {moment(item.created_at).format("MMMM D, YYYY")}</b>
       </li>
-      {/* End li */}
-
-      <li>
-        <span className="icon flaticon-briefcase"></span>
-        <strong>Jack Milk</strong> applied for a job
-        <span className="colored"> Technical Architect</span>
-      </li>
-      {/* End li */}
-
-      <li className="success">
-        <span className="icon flaticon-briefcase"></span>
-        <strong>Michel Arian</strong>
-        applied for a job
-        <span className="colored"> Software Engineer</span>
-      </li>
-      {/* End li */}
-
-      <li>
-        <span className="icon flaticon-briefcase"></span>
-        <strong>Wade Warren</strong> applied for a job
-        <span className="colored"> Web Developer</span>
-      </li>
-      {/* End li */}
-
-      <li className="success">
-        <span className="icon flaticon-briefcase"></span>
-        <strong>Michel Arian</strong>
-        applied for a job
-        <span className="colored"> Software Engineer</span>
-      </li>
-      {/* End li */}
+          )    
+        })
+      }
     </ul>
   );
 };

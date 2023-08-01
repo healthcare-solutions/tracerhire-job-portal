@@ -19,7 +19,7 @@ const JobListingsTable = () => {
 
   const dateFormat = (val) => {
     const date = new Date(val)
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + date.getFullYear()
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + date.getFullYear();
   }
 
   // clear all filters
@@ -31,24 +31,25 @@ const JobListingsTable = () => {
   async function findAppliedJob() {
 
     let { data, error } = await supabase
-      .from('applicants_view')
+      .from('applications_view')
       .select()
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (data) {
+      console.log("Data", data);
       data.forEach(job => job.created_at = dateFormat(job.created_at))
       setApplications(data.filter((job) => job.job_title.toLowerCase().includes(searchField.toLowerCase())))
     }
   };
 
   const fetchApplications = async (pageNo) => {
-
     setIsLoading(true);
     let countTotalRecords = await supabase
-      .from('applicants_view')
+      .from('applications_view')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id);
+
     let totalRecords = countTotalRecords.count;
     let recordPerPage = rpp;
     let totalPages = Math.ceil(totalRecords / recordPerPage);
@@ -65,10 +66,9 @@ const JobListingsTable = () => {
         start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
       }
       let end_limit = parseInt(start_limit) + parseInt(rpp);
-      console.log("start_limit", start_limit, "end_limit", end_limit);
       setCurrentPage(pageNo);
       let { data: applications, error } = await supabase
-        .from('applicants_view')
+        .from('applications_view')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -80,11 +80,13 @@ const JobListingsTable = () => {
       }
       setIsLoading(false);
     }
+    setIsLoading(false);
   }
 
   useEffect(() => {
     setIsLoading(true);
     fetchApplications(currentPage);
+    console.log("applications",applications);
   }, []);
 
   const handleNextPage = (pageNo) => {
@@ -166,7 +168,7 @@ const JobListingsTable = () => {
       </div>
 
       {/* Start table widget content */}
-      {isLoading == false && applications.length == 0 ? <p style={{ fontSize: '1rem', fontWeight: '500' }}><center>You have not applied to any jobs yet!</center></p> :
+      {isLoading == false && applications.length == 0 ? <p style={{ fontSize: '1rem', paddingBottom:40, fontWeight: '500' }}><center>You have not applied to any jobs yet!</center></p> :
         <div className="widget-content">
           <div className="table-outer">
             <div className="table-outer">
@@ -263,11 +265,24 @@ const JobListingsTable = () => {
                         </li>
                       }
 
-                      {
+{
                         arrPages.map(item => {
-                          return (
-                            <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
-                          )
+                          if(arrPages.length > 6){
+                            let nextThreePages = item - 4;
+                            let prevThreePages = item + 4;
+                            if(currentPage > nextThreePages){
+                              if(currentPage < prevThreePages){
+                              return (
+                                <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                              )
+                              }
+                            }
+                          } else{
+                            return (
+                              <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                            )
+                          }
+                          
                         })
                       }
 

@@ -660,7 +660,7 @@ const EditJobView = ({ fetchedJobData }) => {
           <input
             type="text"
             name="name"
-            placeholder="329 Queensberry Street, North Melbourne VIC 3051, Australia."
+            placeholder="Richmond, VA, USA"
           />
         </div> */}
         {/* <!-- Input --> */}

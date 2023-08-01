@@ -1,6 +1,7 @@
 import ChatHamburger from "./ChatHamburger";
 
-const ChatBoxContentField = () => {
+const ChatBoxContentField = ({navigation,routes}) => {
+    console.log("Routes", routes);
     return (
         <div className="card message-card">
             <div className="card-header msg_head">
@@ -13,15 +14,14 @@ const ChatBoxContentField = () => {
                         />
                     </div>
                     <div className="user_info">
-                        <span>Arlene McCoy</span>
-                        <p>Active</p>
+                        <span>Keyur Patel</span>
                     </div>
                 </div>
 
-                <div className="btn-box">
+                {/* <div className="btn-box">
                     <button className="dlt-chat">Delete Conversation</button>
                     <ChatHamburger />
-                </div>
+                </div> */}
             </div>
             {/* End .cart-header */}
 

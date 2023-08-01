@@ -68,7 +68,7 @@ const signInWithGoogle = async (dispatch) => {
     }
     
     
-    dispatch(setUserData( {name: userData.name, id: userData.user_id, email: userData.email, role: userData.role}))
+    dispatch(setUserData( {name: userData.name, id: userData.user_id, email: userData.email, role: userData.role, user_photo: userData.user_photo,photo_url: userData.photo_url}))
     document.getElementById("close-button").click()
 
     // open toast

@@ -8,10 +8,12 @@ import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
 import { setUserData } from "../../features/candidate/candidateSlice";
 import { logout } from "../../utils/logout";
+import { supabase } from "../../config/supabaseClient";
 import candidatesMenuData from "../../data/candidatesMenuData";
 
 const DashboardHeader = () => {
   const [navbar, setNavbar] = useState(false);
+  const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -26,10 +28,49 @@ const DashboardHeader = () => {
 
   useEffect(() => {
     window.addEventListener("scroll", changeBackground);
+    fetchUserUnreadMessages();
   }, []);
 
   const user = useSelector(state => state.candidate.user)
-  const menuOptions = user.role !== 'CANDIDATE' ?  employerMenuData : candidatesMenuData
+  const menuOptions = user.role !== 'CANDIDATE' ?  employerMenuData : candidatesMenuData;
+  const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
+    let photo_url = '/images/icons/user.svg';
+    if(user.user_photo != null){
+        photo_url = cloudPath+user.user_photo;
+    } else if(user.photo_url != null){
+        photo_url = user.photo_url;
+    }
+
+    const fetchUserUnreadMessages = async () => {
+
+      let total_unread = 0;
+      const fetchFromData = [];
+      
+      const fetchToData = await supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .is('seen_time', null)
+          .eq('to_user_id', user.id);
+          //console.log("To User",user.id);
+          //console.log("fetchToData",fetchToData);
+      // const fetchFromData = await supabase
+      //     .from('messages')
+      //     .select('*', { count: 'exact', head: true })
+      //     .is('seen_time', null)
+      //     .eq('from_user_id', user.id);
+      //console.log("fetchFromData",fetchFromData);
+
+      if (fetchToData.count > 0) {
+          total_unread += fetchToData.count;
+      }
+      // if (fetchFromData.count > 0) {
+      //     total_unread += fetchFromData.count;
+      // }
+      //console.log("total_unread", total_unread);
+      if (total_unread > 0) {
+          setTotalUnreadMessages(total_unread);
+      }
+  }
 
   return (
     // <!-- Main Header-->
@@ -75,16 +116,28 @@ const DashboardHeader = () => {
 
             {/* <!-- Dashboard Option --> */}
             <div className="dropdown dashboard-option">
+            
               <a
                 className="dropdown-toggle"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
+                {
+                totalUnreadMessages > 0 && <span>
+                    <a onClick={() => handleNavigateToMessage()}>
+                        <button className="menu-btn" style={{marginRight:20}}>
+                            <span className="count">{totalUnreadMessages}</span>
+                            <span className="icon la la-envelope"></span>
+                        </button>
+                    
+                    </a>
+                </span>
+            }
                 <Image
                   alt="avatar"
                   className="thumb"
-                  src="/images/icons/user.svg"
+                  src={photo_url}
                   width={20}
                   height={20}
                 />
