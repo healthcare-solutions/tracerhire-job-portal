@@ -4,106 +4,158 @@ import { supabase } from "../../../../../config/supabaseClient";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { BallTriangle } from 'react-loader-spinner'
+import { useRouter } from "next/router";
+import moment from 'moment';
 
 const JobAlertsTable = () => {
 
-  const [applications, setApplications] = useState([]);
-  const [searchField, setSearchField] = useState('');
+ 
+  const user = useSelector(state => state.candidate.user)
+  const userId = user.id
+  const router = useRouter();
+
   const [rpp, setRpp] = useState(20);
   const [arrPages, setArrPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-
-  const user = useSelector(state => state.candidate.user)
-
-  const dateFormat = (val) => {
-    const date = new Date(val)
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + date.getFullYear();
-  }
-
-  // clear all filters
-  const clearAll = () => {
-    setSearchField('');
-    fetchApplications(currentPage)
-  };
-
-  async function findAppliedJob() {
-
-    let { data, error } = await supabase
-      .from('applications_view')
-      .select()
-      .eq('user_id', user.id)
-      .filter('status', 'in', '("Qualified","Shortlisted")')
-      .order('created_at', { ascending: false });
-
-    if (data) {
-      console.log("Data", data);
-      data.forEach(job => job.created_at = dateFormat(job.created_at))
-      setApplications(data.filter((job) => job.job_title.toLowerCase().includes(searchField.toLowerCase())))
-    }
-  };
-
-  const fetchApplications = async (pageNo) => {
-    setIsLoading(true);
-    let countTotalRecords = await supabase
-      .from('applications_view')
-      .select('*', { count: 'exact', head: true })
-      .filter('status', 'in', '("Qualified","Shortlisted")')
-      .eq('user_id', user.id);
-
-    let totalRecords = countTotalRecords.count;
-    let recordPerPage = rpp;
-    let totalPages = Math.ceil(totalRecords / recordPerPage);
-    setTotalPages(totalPages);
-    if (totalPages) {
-      let arrPage = [];
-      for (var i = 1; i <= totalPages; i++) {
-        arrPage.push(i);
-      }
-      setArrPages(arrPage);
-
-      let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
-      if (pageNo < 1) {
-        start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
-      }
-      let end_limit = parseInt(start_limit) + parseInt(rpp);
-      setCurrentPage(pageNo);
-      let { data: applications, error } = await supabase
-        .from('applications_view')
-        .select('*')
-        .eq('user_id', user.id)
-        .filter('status', 'in', '("Qualified","Shortlisted")')
-        .order('created_at', { ascending: false })
-        .range(start_limit, end_limit);
-
-      if (applications) {
-        applications.forEach(i => i.created_at = dateFormat(i.created_at))
-        setApplications(applications)
-      }
-      setIsLoading(false);
-    }
-    setIsLoading(false);
-  }
+  const [userData, setUserData] = useState([]);
+  const [keyword, setKeyword] = useState(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchApplications(currentPage);
+    fetchPost(keyword, currentPage);
   }, []);
+
+  const handleKeyword = async (e) => {
+    setKeyword(e.target.value);
+    fetchPost(e.target.value, currentPage);
+  }
+
+  const fetchPost = async (newKeyword, pageNo) => {
+    setKeyword(newKeyword);
+    setIsLoading(true);
+    if (newKeyword != null) {
+      let { data, error } = await supabase
+        .from('notification')
+        .select()
+        .like('notification_text', '%' + newKeyword + '%')
+        //.eq('user_id', user.id)
+        .is('deleted', null)
+        //.not('status',"eq",'Qualified');
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (data) {
+        setUserData(data);
+      }
+      setIsLoading(false);
+    } else {
+
+
+      let countTotalRecords = await supabase
+        .from('notification')
+        .select('*', { count: 'exact', head: true })
+        //.eq('user_id', user.id)
+        .is('deleted', null);
+      let totalRecords = countTotalRecords.count;
+      
+      let recordPerPage = rpp;
+      let totalPages = Math.ceil(totalRecords / recordPerPage);
+      setTotalPages(totalPages);
+      console.log("totalRecords",totalRecords,"recordPerPage",recordPerPage,"totalPages",totalPages);
+      if (totalPages) {
+        let arrPage = [];
+        for (var i = 1; i <= totalPages; i++) {
+          arrPage.push(i);
+        }
+        console.log("arrPage",arrPage);
+        setArrPages(arrPage);
+        let start_limit = parseInt(parseInt(pageNo - 1) * parseInt(rpp));
+        if (pageNo < 1) {
+          start_limit = parseInt(parseInt(pageNo) * parseInt(rpp));
+        }
+        let end_limit = parseInt(start_limit) + parseInt(rpp);
+        console.log("start_limit", start_limit, "end_limit", end_limit);
+        setCurrentPage(pageNo);
+
+        let { data, error } = await supabase
+          .from('notification')
+          .select()
+          //.eq('user_id', user.id)
+          //.not('status',"eq",'Qualified');
+          .is('deleted', null)
+          .order('created_at', { ascending: false })
+          .range(start_limit, end_limit);
+        if (data) {
+          setUserData(data);
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    }
+  }
+
+  const handleDeleteNotification = async (id) => {
+    let result = await supabase
+      .from('notification')
+      .delete()
+      .eq('id', id);
+      
+    if (result) {
+      fetchPost(keyword, currentPage);
+    }
+  }
 
   const handleNextPage = (pageNo) => {
     setIsLoading(true);
-    fetchApplications(pageNo);
+    fetchPost(keyword, pageNo);
   }
 
-  return (
-    <div className="tabs-box">
-      <div className="widget-title">
-        <h4>Job Alerts</h4>
 
-        {
-          isLoading &&
-          <div style={{ width: '20%', margin: "auto" }}>
+  return (
+
+       
+          <div className="tabs-box">
+            <div className="widget-title">
+            <h4>Job Alerts!</h4>
+            <div className="search-box-one">
+              <form method="post" action="blog.html">
+              
+              <div className="form-group pull-left mb-3">
+              
+              </div>
+                <div className="form-group pull-right mb-3">
+                
+                  <span className="icon flaticon-search-1"></span>
+                  <input
+                    type="search"
+                    onChange={(e) => handleKeyword(e)}
+                    name="search-field"
+                    value={keyword}
+                    placeholder="Search"
+                    required
+                  />
+                </div>
+              </form>
+              <br />
+            </div>
+
+            <table className="default-table manage-job-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Notification</th>
+                  <th>Created</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              {/* End thead */}
+
+              <tbody>
+              { isLoading &&
+          <tr>
+            <td colspan="4" align="center">
+            <div style={{ width: '100%', margin: "auto" ,textAlign:'center' }}>
             <BallTriangle
               height={100}
               width={100}
@@ -111,199 +163,78 @@ const JobAlertsTable = () => {
               color="#000"
               ariaLabel="ball-triangle-loading"
               wrapperClass={{}}
-              wrapperStyle=""
+              wrapperStyle={{justifyContent:'center'}}
               visible={true}
             />
           </div>
+            </td>
+          </tr>
         }
-
-        {isLoading == false && applications.length != 0 ?
-          <div className="chosen-outer">
-            {/* <select className="chosen-single form-select chosen-container"> */}
-            {/* <option>All Status</option> */}
-            {/* <option>Last 12 Months</option> */}
-            {/* <option>Last 16 Months</option> */}
-            {/* <option>Last 24 Months</option> */}
-            {/* <option>Last 5 year</option> */}
-            {/* </select> */}
-
-            {/* TODO: add search filters */}
-            <input
-              className="chosen-single form-input chosen-container mx-3"
-              type="text"
-              name="tracer-hire-job_title"
-              placeholder="Search by Job Title"
-              value={searchField}
-              onChange={(e) => {
-                setSearchField(e.target.value);
-              }}
-              style={{ minWidth: '450px' }}
-            />
-            {/*           
-              <select
-                className="chosen-single form-select chosen-container mx-3"
-                onChange={(e) => {
-                  setJobStatus(e.target.value)
-                }}
-              >
-                <option>Status</option>
-                <option>Published</option>
-                <option>Unpublished</option>
-              </select> */}
-
-            <button
-              onClick={findAppliedJob}
-              className="btn btn-primary text-nowrap m-1"
-              style={{ minHeight: '43px' }}
-            >
-              Search
-            </button>
-            <button
-              onClick={clearAll}
-              className="btn btn-danger text-nowrap m-1"
-              style={{ minHeight: '43px' }}
-            >
-              Clear
-            </button>
-          </div>
-          : ''}
-      </div>
-
-      {/* Start table widget content */}
-      {isLoading == false && applications.length == 0 ? <p style={{ fontSize: '1rem', paddingBottom:40, fontWeight: '500' }}><center>You have not any job alert yet!</center></p> :
-        <div className="widget-content">
-          <div className="table-outer">
-            <div className="table-outer">
-              <table className="default-table manage-job-table">
-                <thead>
+                {userData && userData.map((candidate) => (
                   <tr>
-                    <th>Job Title</th>
-                    <th>Date Applied</th>
-                    <th>Status</th>
-                    {/* <th>Action</th> */}
+                    <td>{candidate.type}</td>
+                    <td>
+                    <div dangerouslySetInnerHTML={{ __html: candidate.notification_text}}></div>
+                    
+                    </td>
+                    <td>{moment(candidate.created_at).format("MMMM D, YYYY")}</td>
+                    <td>
+                      <button onClick={() => { handleDeleteNotification(candidate.id) }}>
+                        <i className="la la-trash"></i>
+                      </button>
+                    </td>
                   </tr>
-                </thead>
+                ))}
+              </tbody>
+            </table>
+            {
+              isLoading == false && userData.length == 0 && <p style={{ fontSize: '1rem', fontWeight: '500', paddingBottom: 40, paddingTop: 40, textAlign: 'center' }}><center>No any resume alert  yet!</center></p>
+            }
+            {
+              userData.length != 0 && arrPages.length > 1 &&
+              <nav className="ls-pagination">
+                <ul>
+                  {
+                    currentPage > 1 && <li className="prev">
+                      <a onClick={() => handleNextPage(parseInt(currentPage) - parseInt(1))}>
+                        <i className="fa fa-arrow-left"></i>
+                      </a>
+                    </li>
+                  }
 
-                <tbody>
-                  {applications.slice(0, 4).map((item) => (
-                    <tr key={item.application_id}>
-                      <td>
-                        {/* <!-- Job Block --> */}
-                        <div className="job-block">
-                          <div className="inner-box">
-                            <div>
-                              {/* <span className="company-logo">
-                                  <img src={item.logo} alt="logo" />
-                                </span> */}
-                              <h4>
-                                <Link href={`/job/${item.job_id}`}>
-                                  {item.job_title}
-                                </Link>
-                              </h4>
-                              <ul className="job-info">
-                                {item?.job_type ?
-                                  <li>
-                                    <span className="icon flaticon-clock-3"></span>
-                                    {item?.job_type}
-                                  </li>
-                                  : ''}
-                                {item?.job_address ?
-                                  <li>
-                                    <span className="icon flaticon-map-locator"></span>
-                                    {item?.job_address}
-                                  </li>
-                                  : ''}
-                                {/* location info */}
-                                {item?.salary ?
-                                  <li>
-                                    <span className="icon flaticon-money"></span>{" "}
-                                    ${item?.salary} {item?.salary_rate}
-                                  </li>
-                                  : ''}
-                                {/* salary info */}
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{item.created_at}</td>
-                      {item.status == "Qualified" ?
-                        <td className="status">{item.status}</td>
-                        : item.status == "Not Qualified" ?
-                          <td className="status" style={{ color: 'red' }}>{item.status}</td>
-                          : item.status == null ?
-                            <td className="pending">Pending</td>
-                            : <td className="pending">{item.status}</td>
-                      }
-                      {/* <td>
-                          <div className="option-box">
-                            <ul className="option-list">
-                              <li>
-                                <button data-text="View Aplication">
-                                  <span className="la la-eye"></span>
-                                </button>
-                              </li>
-                              <li>
-                                <button data-text="Delete Aplication">
-                                  <span className="la la-trash"></span>
-                                </button>
-                              </li>
-                            </ul>
-                          </div>
-                        </td> */}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {
-                  isLoading == false && arrPages.length > 1 &&
-                  <nav className="ls-pagination">
-                    <ul>
-                      {
-                        currentPage > 1 && <li className="prev">
-                          <a onClick={() => handleNextPage(parseInt(currentPage) - parseInt(1))}>
-                            <i className="fa fa-arrow-left"></i>
-                          </a>
-                        </li>
-                      }
-
-{
-                        arrPages.map(item => {
-                          if(arrPages.length > 6){
-                            let nextThreePages = item - 4;
-                            let prevThreePages = item + 4;
-                            if(currentPage > nextThreePages){
-                              if(currentPage < prevThreePages){
-                              return (
-                                <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
-                              )
-                              }
-                            }
-                          } else{
-                            return (
-                              <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
-                            )
+                  {
+                    arrPages.map(item => {
+                      if(arrPages.length > 6){
+                        let nextThreePages = item - 4;
+                        let prevThreePages = item + 4;
+                        if(currentPage > nextThreePages){
+                          if(currentPage < prevThreePages){
+                          return (
+                            <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                          )
                           }
-                          
-                        })
+                        }
+                      } else{
+                        return (
+                          <li><a onClick={() => handleNextPage(item)} className={item == currentPage ? 'current-page' : 'non-current-page'}>{item}</a></li>
+                        )
                       }
+                      
+                    })
+                  }
 
-                      {
-                        currentPage < totalPages && <li className="next">
-                          <a onClick={() => handleNextPage(parseInt(currentPage) + parseInt(1))}>
-                            <i className="fa fa-arrow-right"></i>
-                          </a>
-                        </li>
-                      }
-
-                    </ul>
-                  </nav>
-                }
-            </div>
+                  {
+                    currentPage < totalPages && <li className="next">
+                      <a onClick={() => handleNextPage(parseInt(currentPage) + parseInt(1))}>
+                        <i className="fa fa-arrow-right"></i>
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </nav>
+            }
           </div>
-        </div>
-      }
-    </div>
+          </div>
   );
 };
 
