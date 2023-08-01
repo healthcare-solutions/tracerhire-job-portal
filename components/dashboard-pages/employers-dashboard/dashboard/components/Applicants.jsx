@@ -93,7 +93,7 @@ const Applicants = () => {
                 <img src={candidate.photo_url} alt="candidates" />
               </figure>
               <h4 className="name">
-                <Link href={`/candidate-details/${candidate.application_id}`}>
+                <Link href={`/candidate-details/${candidate.user_id}`}>
                   {candidate.name}
                 </Link>
               </h4>

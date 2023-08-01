@@ -21,11 +21,11 @@ const Notification = () => {
     setIsLoading(true);
     let dataNotifications = await supabase
       .from('notification')
-      .select('notification_text,created_at')
+      .select('notification_text,created_at,id')
       //.eq('user_id', user.id)
       //.not('status',"eq",'Qualified');
       .is('deleted', null)
-      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .range(0, 3);
     if (dataNotifications) {
       setRecentNotifications(dataNotifications.data);

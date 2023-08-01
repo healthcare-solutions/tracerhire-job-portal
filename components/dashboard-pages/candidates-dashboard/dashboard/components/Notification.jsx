@@ -25,7 +25,7 @@ const Notification = () => {
       .eq('user_id', user.id)
       //.not('status',"eq",'Qualified');
       .is('deleted', null)
-      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .range(0, 3);
     if (dataNotifications) {
       setRecentNotifications(dataNotifications.data);

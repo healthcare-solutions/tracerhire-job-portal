@@ -195,7 +195,7 @@ const WidgetContentBox = () => {
         }
     }
 
-    const Qualified = async (applicationId, status, name, license_nbr, job_id, cust_id, job_title) => {
+    const Qualified = async (applicationId, status, name, license_nbr, job_id, cust_id, job_title,user_id) => {
         if (status != 'Qualified') {
 
             const { data, error } = await supabase
@@ -213,6 +213,15 @@ const WidgetContentBox = () => {
                         user_id: user.id,
                         application_id: applicationId,
                         notification_text: `${name} is successfully <b>qualified</b> for ${job_title}`,
+                        created_at: dateFormat(new Date())
+                    },
+                    {
+                        type: `Qualified For Job`,
+                        cust_id: cust_id,
+                        job_id: job_id,
+                        user_id: user_id,
+                        application_id: applicationId,
+                        notification_text: `You are successfully <b>qualified</b> for ${job_title}`,
                         created_at: dateFormat(new Date())
                     }
                 ]).select();
@@ -297,14 +306,14 @@ const WidgetContentBox = () => {
         }
     }
 
-    const Shortlisted = async (applicationId, status, name, license_nbr, job_id, cust_id,job_title) => {
+    const Shortlisted = async (applicationId, status, name, license_nbr, job_id, cust_id,job_title,user_id) => {
         if (status != 'Shortlisted') {
             const { data, error } = await supabase
                 .from('applications')
                 .update({ status: 'Shortlisted' })
                 .eq('application_id', applicationId);
 
-                let insertNotification = await supabase
+                await supabase
                 .from('notification')
                 .insert([
                     {
@@ -315,9 +324,17 @@ const WidgetContentBox = () => {
                         application_id: applicationId,
                         notification_text: `${name} is <b>shortlisted</b> for ${job_title}`,
                         created_at: dateFormat(new Date())
+                    },
+                    {
+                        type: `Shortlisted For Job`,
+                        cust_id: cust_id,
+                        job_id: job_id,
+                        user_id: user_id,
+                        application_id: applicationId,
+                        notification_text: `You are <b>shortlisted</b> for ${job_title}`,
+                        created_at: dateFormat(new Date())
                     }
                 ]).select();
-                console.log("insertNotification",insertNotification);
 
             // open toast
             toast.success('Applicant status marked as Shortlisted.  Please let Applicant know about your decision!', {
@@ -530,7 +547,7 @@ const WidgetContentBox = () => {
                                                             <span className="la la-file-download"></span>
                                                         </button>
                                                     </li>
-                                                    <li onClick={() => { Qualified(applicant.application_id, applicant.status,applicant.name,applicant.license_nbr,applicant.job_id, applicant.cust_id,applicant.job_title) }} >
+                                                    <li onClick={() => { Qualified(applicant.application_id, applicant.status,applicant.name,applicant.license_nbr,applicant.job_id, applicant.cust_id,applicant.job_title,applicant.user_id) }} >
                                                         <button data-text="Qualified">
                                                             <span className="la la-check"></span>
                                                         </button>
@@ -540,7 +557,7 @@ const WidgetContentBox = () => {
                                                             <span className="la la-times-circle"></span>
                                                         </button>
                                                     </li>
-                                                    <li onClick={() => { Shortlisted(applicant.application_id, applicant.status,applicant.name,applicant.license_nbr,applicant.job_id, applicant.cust_id,applicant.job_title) }} >
+                                                    <li onClick={() => { Shortlisted(applicant.application_id, applicant.status,applicant.name,applicant.license_nbr,applicant.job_id, applicant.cust_id,applicant.job_title,applicant.user_id) }} >
                                                         <button data-text="Shortlisted">
                                                             <span className="la la-bookmark"></span>
                                                         </button>
