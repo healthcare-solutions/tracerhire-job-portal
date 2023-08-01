@@ -32,7 +32,7 @@ const TopCardBlock = () => {
     }
 
     let countTotalApplications = await supabase
-      .from('applications')
+      .from('notification')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .is('deleted', null);

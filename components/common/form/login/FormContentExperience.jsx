@@ -99,7 +99,7 @@ const FormContentExperience = (props) => {
           <input
             type="text"
             name="degree-name"
-            placeholder="Enter Your Degree"
+            placeholder="Enter Your Designation"
             value={degree}
             onChange={(e) => setDegree(e.target.value)}
             required
@@ -111,7 +111,7 @@ const FormContentExperience = (props) => {
           <input
             type="text"
             name="school-name"
-            placeholder="Enter Your school"
+            placeholder="Enter Your Company"
             value={school}
             onChange={(e) => setSchool(e.target.value)}
             required
