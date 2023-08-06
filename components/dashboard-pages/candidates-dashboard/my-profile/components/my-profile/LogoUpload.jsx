@@ -11,6 +11,7 @@ const LogoUpload = () => {
     const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
     const [customer, setCustomer] = useState(null);
     const [logoFilename, setLogoFilename] = useState(null);
+    const [logoFile,setLogoFile] = useState(null);
 
     const [logImg, setLogoImg] = useState("");
 
@@ -28,15 +29,18 @@ const LogoUpload = () => {
                     .eq('cust_id', userID)
 
                 if (customer) {
+                    console.log("customer", customer[0])
                     setCustomer(customer[0]);
-                    console.log("customer[0]",customer);
-                    if (customer[0].profile_logo != "") {
-                        setLogoFilename(cloudPath + customer[0].profile_logo);
+                    if (customer[0].profile_logo != "" && customer[0].profile_logo != null) {
+                        setLogoFilename(cloudPath + encodeURIComponent(customer[0].profile_logo));
+                        if(customer[0].profile_logo.length > 5){
+                            setLogoFile(customer[0].profile_logo);
+                        }
                     }
                 }
             }
         } catch (e) {
-            toast.error('System is unavailable.  Please try again later or contact tech support!', {
+            toast.error('System is unavailable to fetch profile photo.  Please try again later or contact tech support!', {
                 position: "bottom-right",
                 autoClose: false,
                 hideProgressBar: false,
@@ -121,6 +125,9 @@ const LogoUpload = () => {
                     .eq('user_id', user.id);
 
                     setLogoFilename(cloudPath + fileTimestamp + '-' + selectedFile.name);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
                 }
             }
         }
@@ -141,6 +148,40 @@ const LogoUpload = () => {
     const logImgHander = (e) => {
         setLogoImg(e.target.files[0]);
     };
+
+    const handleDeleteLogo = async () => {
+        if(confirm("Are you sure you wish to delete photo?")){
+            const { data, error } = await supabase
+            .from('users')
+            .update({
+                user_photo: ""
+            })
+            .eq('user_id', user.id);
+            
+            await supabase
+            .from('cust_dtl')
+            .update({
+                profile_logo: "",
+                modified_at: new Date()
+            })
+            .eq('cust_id', user.id);
+            
+            toast.success('Photo deleted successfully.', {
+                position: "bottom-right",
+                autoClose: false,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+    }
+
     return (
         <>
             <div className="uploading-outer">
@@ -165,6 +206,9 @@ const LogoUpload = () => {
                 <div className="text">
                     Max file size is 1MB, Minimum dimension: 330x300 And
                     Suitable files are .jpg & .png
+                    {
+                        logoFile && logoFile != "" && <div onClick={() => handleDeleteLogo()} style={{color:'#FF0000',cursor:'pointer'}}>Delete</div>
+                    }
                     {/* {
                         logoFilename && logoFilename != "" && <img src={logoFilename} style={{ width: 100 }} />
                     } */}

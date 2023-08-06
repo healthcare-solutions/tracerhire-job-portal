@@ -109,8 +109,8 @@ const FormInfoBox = () => {
         }
       }
     } catch (e) {
-      console.log("Error", e);
-      toast.error('System is unavailable.  Please try again later or contact tech support!', {
+      console.log("Fetch Customer Error", e);
+      toast.error('System is unavailable to fetch customer.  Please try again later or contact tech support!', {
         position: "bottom-right",
         autoClose: true,
         hideProgressBar: false,

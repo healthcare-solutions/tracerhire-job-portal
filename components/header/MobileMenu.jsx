@@ -13,9 +13,11 @@ const MobileMenu = () => {
     const showLoginButton = useMemo(() => !user?.id, [user]);
     const [cloudPath, setCloudPath] = useState("https://ntvvfviunslmhxwiavbe.supabase.co/storage/v1/object/public/applications/cv/");
     let photo_url = '/images/icons/user.svg';
-    if(user.user_photo != null){
+    console.log("user.u",user.user_photo);
+    if(user.user_photo != null && user.user_photo.length > 5){
         photo_url = cloudPath+user.user_photo;
-    } else if(user.photo_url != null){
+    }
+     else if(user.photo_url != null && user.photo_url != ""){
         photo_url = user.photo_url;
     }
     const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);

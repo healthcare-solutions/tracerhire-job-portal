@@ -11,6 +11,9 @@ const LogoCoverUploader = () => {
     const [logoFilename, setLogoFilename] = useState(null);
     const [coverFilename, setCoverFilename] = useState(null);
 
+    const [logoFile, setLogoFile] = useState(null);
+    const [coverFile, setCoverFile] = useState(null);
+
     useEffect(() => {
         fetchCustomer(user.id);
     }, []);
@@ -25,14 +28,19 @@ const LogoCoverUploader = () => {
 
                 if (customer) {
                     setCustomer(customer[0]);
-                    if (customer[0].profile_logo != "") {
-                        setLogoFilename(cloudPath + customer[0].profile_logo);
-                        setCoverFilename(cloudPath + customer[0].profile_cover);
+                    console.log(customer[0]);
+                    if (customer[0].profile_logo != null && customer[0].profile_logo.length > 5) {
+                        setLogoFile(customer[0].profile_logo);
                     }
+                    setLogoFilename(cloudPath + encodeURIComponent(customer[0].profile_logo));
+                    if (customer[0].profile_cover != null && customer[0].profile_cover.length > 5) {
+                        setCoverFile(customer[0].profile_cover);
+                    }
+                    setCoverFilename(cloudPath + encodeURIComponent(customer[0].profile_cover));
                 }
             }
         } catch (e) {
-            toast.error('System is unavailable.  Please try again later or contact tech support!', {
+            toast.error('System is unavailable to fetch logo.  Please try again later or contact tech support!', {
                 position: "bottom-right",
                 autoClose: false,
                 hideProgressBar: false,
@@ -119,6 +127,9 @@ const LogoCoverUploader = () => {
                     //console.log("errorUser",errorUser);
 
                     setLogoFilename(cloudPath + fileTimestamp + '-' + selectedFile.name);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
                 }
             }
         }
@@ -200,6 +211,9 @@ const LogoCoverUploader = () => {
                         .eq('cust_dtl_id', data[0].cust_dtl_id);
                         setCoverFilename(cloudPath + fileTimestamp + '-' + selectedFile.name);
                 }
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
             }
         }
         else {
@@ -213,6 +227,70 @@ const LogoCoverUploader = () => {
                 progress: undefined,
                 theme: "colored",
             });
+        }
+    }
+
+    const handleDeleteCoverPhoto = async () => {
+        if(confirm("Are you sure you wish to delete photo?")){
+            // const { data, error } = await supabase
+            // .from('users')
+            // .update({
+            //     user_photo: ""
+            // })
+            // .eq('user_id', user.id);
+            await supabase
+            .from('cust_dtl')
+            .update({
+                profile_cover: "",
+                modified_at: new Date()
+            })
+            .eq('cust_id', user.id);
+            
+            toast.success('Cover Photo deleted successfully.', {
+                position: "bottom-right",
+                autoClose: false,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+    }
+
+    const handleDeletePhoto = async () => {
+        if(confirm("Are you sure you wish to delete photo?")){
+            const { data, error } = await supabase
+            .from('users')
+            .update({
+                user_photo: ""
+            })
+            .eq('user_id', user.id);
+            await supabase
+            .from('cust_dtl')
+            .update({
+                profile_logo: "",
+                modified_at: new Date()
+            })
+            .eq('cust_id', user.id);
+            
+            toast.success('Logo deleted successfully.', {
+                position: "bottom-right",
+                autoClose: false,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         }
     }
 
@@ -240,9 +318,9 @@ const LogoCoverUploader = () => {
                 <div className="text">
                     Max file size is 1MB, Minimum dimension: 330x300 And
                     Suitable files are .jpg & .png
-                    {/* {
-                        logoFilename && logoFilename != "" && <img src={logoFilename} style={{ width: 100 }} />
-                    } */}
+                    {
+                        logoFile && logoFile != "" && <div onClick={() => handleDeletePhoto()} style={{color:'#FF0000',cursor:'pointer'}}>Delete</div>
+                    }
                 </div>
             </div>
 
@@ -269,6 +347,9 @@ const LogoCoverUploader = () => {
                 <div className="text">
                     Max file size is 1MB, Minimum dimension: 330x300 And
                     Suitable files are .jpg & .png
+                    {
+                        coverFile && coverFile != "" && <div onClick={() => handleDeleteCoverPhoto()} style={{color:'#FF0000',cursor:'pointer'}}>Delete</div>
+                    }
                     {/* {
                         coverFilename && coverFilename != "" && <img src={coverFilename} style={{ width: 100 }} />
                     } */}

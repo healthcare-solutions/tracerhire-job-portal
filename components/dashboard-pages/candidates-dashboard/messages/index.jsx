@@ -32,6 +32,7 @@ const Index = () => {
   const [isLoadingLeft, setIsLoadingLeft] = useState(false);
   const [userData, setUserData] = useState([]);
   const [chatUserName, setChatUserName] = useState(null);
+  const [chatUserImage, setChatUserImage] = useState(null);
   const [chatUserId, setChatUserId] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
 
@@ -55,7 +56,7 @@ const Index = () => {
             .is('seen_time', null)
             .eq('to_user_id', user.id)
             .eq('from_user_id', element.user_id);
-            let photo_url = '/images/resource/candidate-1.png';
+            let photo_url = '/images/favicon.png';
             if(element.user_photo != null){
               photo_url = cloudPath+element.user_photo;
             } else if(element.photo_url != null){
@@ -99,7 +100,7 @@ const Index = () => {
             .is('seen_time', null)
             .eq('to_user_id', user.id)
             .eq('from_user_id', element.user_id);
-            let photo_url = '/images/resource/candidate-1.png';
+            let photo_url = '/images/favicon.png';
             if(element.user_photo != null){
               photo_url = cloudPath+element.user_photo;
             } else if(element.photo_url != null){
@@ -177,10 +178,21 @@ const Index = () => {
     
     const fetchUser = await supabase
     .from('users')
-    .select('user_id,name')
+    .select('user_id,name,photo_url,user_photo')
     .ilike('user_id', user_id);
+
+    // const fetchCustDtl = await supabase
+    // .from('cust_dtl')
+    // .select('profile_logo')
+    // .ilike('cust_id', user_id);
     
     setChatUserName(fetchUser.data[0].name);
+    setChatUserImage('/images/favicon.png');
+    if (fetchUser.data[0].user_photo != null) {
+      setChatUserImage(cloudPath + fetchUser.data[0].user_photo);
+    } else if (fetchUser.data[0].photo_url != null) {
+      setChatUserImage(fetchUser.data[0].photo_url);
+    }
     setChatUserId(fetchUser.data[0].user_id);
     getDistApplicants(false);
     
@@ -340,7 +352,7 @@ const Index = () => {
               {
                 userData && userData.map((item, index) => {
                   //console.log('item', item);
-                  let image_url = item.photo_url != null ? item.photo_url : '/images/resource/candidate-1.png';
+                  let image_url = item.photo_url != null ? item.photo_url : '/images/favicon.png';
                   let message_url = '/messages?user=' + item.user_id;
                   //let image_url = '/images/resource/candidate-1.png';
                   //let image_url = item.photo_url;
@@ -354,7 +366,7 @@ const Index = () => {
                             alt="chatbox avatar"
                             width={90}
                             height={90}
-                            style={{borderRadius:3}}
+                            style={{ borderRadius: 3, borderWidth:1,borderColor:'#EAEAEA', borderStyle:'solid' }}
                           />
                         </div>
                         <div className="user_info w-100">
@@ -379,7 +391,7 @@ const Index = () => {
             <div className="d-flex bd-highlight">
               <div className="img_cont">
               {chatUserName != null ? <img
-                  src="/images/resource/candidate-8.png"
+                  src={chatUserImage}
                   alt=""
                   className="rounded-circle user_img"
                 /> : ""}

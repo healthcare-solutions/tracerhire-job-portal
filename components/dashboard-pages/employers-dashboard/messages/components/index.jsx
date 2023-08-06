@@ -31,6 +31,7 @@ const ChatBox = () => {
   const [isLoadingLeft, setIsLoadingLeft] = useState(false);
   const [userData, setUserData] = useState([]);
   const [chatUserName, setChatUserName] = useState(null);
+  const [chatUserImage, setChatUserImage] = useState(null);
   const [chatUserId, setChatUserId] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
   // function removeDuplicateObjects(array, property) {
@@ -69,7 +70,7 @@ const ChatBox = () => {
             // .eq('from_user_id', element.user_id);
             // console.log("fetchOneDataUser",fetchOneDataUser);
             //console.log("element",element);
-            let photo_url = '/images/resource/candidate-1.png';
+            let photo_url = '/images/favicon.png';
             if (element.user_photo != null) {
               photo_url = cloudPath + element.user_photo;
             } else if (element.photo_url != null) {
@@ -122,7 +123,7 @@ const ChatBox = () => {
             // .eq('from_user_id', element.user_id);
             // console.log("fetchOneDataUser",fetchOneDataUser);
             //console.log("element",element);
-            let photo_url = '/images/resource/candidate-1.png';
+            let photo_url = '/images/favicon.png';
             if (element.user_photo != null) {
               photo_url = cloudPath + element.user_photo;
             } else if (element.photo_url != null) {
@@ -143,8 +144,6 @@ const ChatBox = () => {
               photo_url: photo_url,
               count: fetchOneData.count
             }
-            //console.log("objData",objData);
-            //console.log("from_user_id",element.user_id,"Count",fetchOneData.count);
             arrData.push(objData);
           }
         }
@@ -166,7 +165,6 @@ const ChatBox = () => {
   };
 
   const fetchUserMessages = async () => {
-    console.log("Fetch User Message Called");
     setUserMessages([]);
     setIsLoading(true);
     const fetchUserMessages = await supabase
@@ -211,10 +209,22 @@ const ChatBox = () => {
 
     const fetchUser = await supabase
       .from('users')
-      .select('user_id,name')
+      .select('user_id,name,photo_url,user_photo')
       .ilike('user_id', user_id);
 
+    //   const fetchCustDtl = await supabase
+    // .from('cust_dtl')
+    // .select('profile_logo')
+    // .ilike('cust_id', user_id);
+    
     setChatUserName(fetchUser.data[0].name);
+    setChatUserImage('/images/favicon.png');
+    if (fetchUser.data[0].user_photo != null) {
+      setChatUserImage(cloudPath + fetchUser.data[0].user_photo);
+    } else if (fetchUser.data[0].photo_url != null) {
+      setChatUserImage(fetchUser.data[0].photo_url);
+    }
+    
     setChatUserId(fetchUser.data[0].user_id);
     getDistApplicants(false);
 
@@ -346,7 +356,7 @@ const ChatBox = () => {
               {
                 userData && userData.map((item, index) => {
                   //console.log('item', item);
-                  let image_url = item.photo_url != null ? item.photo_url : '/images/resource/candidate-1.png';
+                  let image_url = item.photo_url != null ? item.photo_url : '/images/favicon.png';
                   let message_url = '/messages?user=' + item.user_id;
                   //let image_url = item.photo_url;
                   let a_id = user.id + item.user_id;
@@ -359,7 +369,7 @@ const ChatBox = () => {
                             alt="chatbox avatar"
                             width={90}
                             height={90}
-                            style={{ borderRadius: 3 }}
+                            style={{ borderRadius: 3, borderWidth:1,borderColor:'#EAEAEA', borderStyle:'solid' }}
                           />
                         </div>
                         <div className="user_info w-100">
@@ -384,7 +394,7 @@ const ChatBox = () => {
             <div className="d-flex bd-highlight">
               <div className="img_cont">
                 {chatUserName != null ? <img
-                  src="/images/resource/candidate-8.png"
+                  src={chatUserImage}
                   alt=""
                   className="rounded-circle user_img"
                 /> : ""}

@@ -77,8 +77,10 @@ const ContactInfoBox = () => {
           if (location.address_components.length == 4) {
             setCompanyCountry(location.address_components[3].short_name);
           }
-          setCompanyLatitude(location.geometry.viewport.Va.hi);
-          setCompanyLongitude(location.geometry.viewport.Ha.lo);
+          if(typeof location.geometry.viewport.Ga !== "undefined" && typeof location.geometry.viewport.Ga.hi != "undefined"){
+            setCompanyLatitude(location.geometry.viewport.Ga.hi);
+            setCompanyLongitude(location.geometry.viewport.Ua.lo);
+          }
         }
         setCompanyFindOnMap(searchInput.current.value);
       }, 2000);
@@ -309,7 +311,7 @@ const ContactInfoBox = () => {
           <input
             type="text"
             name="name"
-            placeholder="Melbourne"
+            placeholder="12.34"
             value={companyLatitude}
             onChange={(e) => { setCompanyLatitude(e.target.value) }}
             required
@@ -322,7 +324,7 @@ const ContactInfoBox = () => {
           <input
             type="text"
             name="name"
-            placeholder="Melbourne"
+            placeholder="12.34"
             value={companyLongitude}
             onChange={(e) => { setCompanyLongitude(e.target.value) }}
             required

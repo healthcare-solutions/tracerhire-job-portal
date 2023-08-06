@@ -61,7 +61,7 @@ const Applicants = () => {
             .select()
             .eq('cust_id',item.user_id);
             if(fetchUser){
-              let photo_url = '/images/resource/candidate-1.png';
+              let photo_url = '/images/favicon.png';
               if(fetchUser.data.length > 0 && fetchUser.data[0].profile_logo != null){
                 photo_url = cloudPath+fetchUser.data[0].profile_logo;
               }
@@ -160,7 +160,7 @@ const Applicants = () => {
             .select()
             .eq('cust_id',item.user_id);
             if(fetchUser && fetchUser !== undefined){
-              let photo_url = '/images/resource/candidate-1.png';
+              let photo_url = '/images/favicon.png';
               if(fetchUser.data.length > 0 && fetchUser.data[0].profile_logo != null){
                 photo_url = cloudPath+fetchUser.data[0].profile_logo;
               }

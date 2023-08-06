@@ -106,7 +106,7 @@ const SocialNetworkBox = () => {
           theme: "colored",
         });
         setTimeout(() => {
-          Router.push("/employers-dashboard/company-profile")
+          Router.push("/candidates-dashboard/my-profile")
         }, 3000);
 
       } catch (err) {
