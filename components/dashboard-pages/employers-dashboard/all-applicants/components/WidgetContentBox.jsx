@@ -195,6 +195,68 @@ const WidgetContentBox = () => {
         }
     }
 
+    const DownloadHandler = async (applicant) => {
+        let dataCheck = await supabase
+        .from('notification')
+        .select('*')
+        .eq('application_id', applicant.application_id)
+        .eq('cust_id', applicant.cust_id)
+        .eq('user_id', applicant.user_id)
+        .eq('type', 'Viewed CV');
+        if(dataCheck.data.length == 0){
+            await supabase
+            .from('notification')
+            .insert([{
+                    type: `Viewed CV`,
+                    cust_id: user.id,
+                    job_id: applicant.job_id,
+                    user_id: applicant.cust_id,
+                    application_id: applicant.application_id,
+                    notification_text: `${user.name} Viewed ${applicant.name} CV for job <b>${applicant.job_title}</b>`,
+                    created_at: dateFormat(new Date())
+                }
+            ]);
+        }
+
+        const { data, error } = await supabase
+            .from('applications_view')
+            .select('*')
+            .eq('application_id', applicant.application_id);
+
+        if (data) {
+            let fileName = data[0].doc_dwnld_url.slice(14, -2);
+            fetch(fileName, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/pdf',
+                },
+              })
+                .then(response => response.blob())
+                .then(blob => {
+                  const url = window.URL.createObjectURL(new Blob([blob]));
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = fileName;
+                  document.body.appendChild(link);
+                  link.click();
+                  link.parentNode.removeChild(link);
+                });
+            //window.open(data[0].doc_dwnld_url.slice(14, -2), '_blank', 'noreferrer');
+        }
+        if (error) {
+            toast.error('Error while retrieving CV.  Please try again later or contact tech support!', {
+                position: "bottom-right",
+                autoClose: true,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+        }
+    }
+
     const Qualified = async (applicationId, status, name, license_nbr, job_id, cust_id, job_title,user_id) => {
         if (status != 'Qualified') {
 
@@ -543,7 +605,12 @@ const WidgetContentBox = () => {
                                             <div className="option-box">
                                                 <ul className="option-list">
                                                     <li onClick={() => { ViewCV(applicant) }}>
-                                                        <button data-text="View/Download CV">
+                                                        <button data-text="View CV">
+                                                            <span className="la la-eye"></span>
+                                                        </button>
+                                                    </li>
+                                                    <li onClick={() => { DownloadHandler(applicant) }}>
+                                                        <button data-text="Download CV">
                                                             <span className="la la-file-download"></span>
                                                         </button>
                                                     </li>

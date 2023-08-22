@@ -231,6 +231,25 @@ const CvUploader = () => {
         window.open(cloudPath + filename, '_blank', 'noreferrer');
     }
 
+    const DownloadHandler = (fileName) => {
+        fetch(cloudPath + fileName, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/pdf',
+          },
+        })
+          .then(response => response.blob())
+          .then(blob => {
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+          });
+      };
+
     return (
         <>
             {/* Start Upload resule */}
@@ -288,12 +307,14 @@ const CvUploader = () => {
                             <button onClick={() => viewHandler(file.attachemnt)}>
                                 <span className="la la-eye"></span>
                             </button>
+                            <button onClick={() => DownloadHandler(file.attachemnt)}>
+                                <span className="la la-download"></span>
+                            </button>
                             {
                                 totalCV > 1 && <button onClick={() => deleteHandler(file.id)}>
                                     <span className="la la-trash"></span>
                                 </button>
                             }
-
                         </div>
                     </div>
                 ))}
